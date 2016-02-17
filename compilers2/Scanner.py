@@ -17,18 +17,24 @@ class Scanner:
             elif not i+1 >= input_text_length and self.is_open_comment(self.input_text[i], i):
                 open_comment_count = 1
                 closed_comment_count = 0
+                comment_list = []
+                comment_list.append((i, i+1))
                 i += 2
-                while(i < input_text_length and not open_comment_count == closed_comment_count):
+                while(i < input_text_length and not open_comment_count == closed_comment_count
+                      and not i+1 >= input_text_length):
                     if self.is_open_comment(self.input_text[i], i):
                         open_comment_count += 1
+                        comment_list.append((i, i+1))
                         i += 2
                     elif self.is_closed_comment(self.input_text[i], i):
                         closed_comment_count += 1
+                        comment_list = comment_list[:-1]
                         i += 2
                     else:
                         i += 1
                 if not open_comment_count == closed_comment_count:
-                    print "error: unclosed comment"
+                    start_position, end_position = comment_list[len(comment_list)-1]
+                    print "error: unclosed comment at position ({0}, {1})".format(start_position, end_position)
                     error_flag = 1
                     break
 
@@ -116,7 +122,8 @@ class Scanner:
 def main():
     # s = Scanner("VAR ics142: ARRAY 5 OF INTEGER;")
     # s = Scanner("asdf 8_9 * ()^D")
-    s = Scanner("(* outside test (*inside test*)*) *)")
+    # s = Scanner("VAR ics142: ARRAY 5 OF INTEGER; (*final*)")
+    # s = Scanner("(*")
     # s = Scanner("PROGRAM As3;\nCONST x = -47;TYPE T = RECO$RD f: INTEGER; END; VAR a: 123ARRAY123 12 OF T; BEGINa[7].f := -x/END As3.")
     for elem in s.tokenlist:
         print elem
