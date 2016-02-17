@@ -1,10 +1,14 @@
 class Token():
-
+    # list of all valid keywords
     keyword_list = ["CONST", "PROGRAM", "BEGIN", "END", "TYPE", "VAR",
                     "ARRAY", "IF", "OF", "DIV", "ELSE", "REPEAT", "WHILE", "WRITE", "READ",
                     "THEN", "END", "MOD", "DO", "RECORD", "UNTIL"]
+    # list of all valid symbols
     symbol_list = ["+", "-", "*", ":", ";", "=", "<", ">", "<=",
                    ">=", "#", ":=", "(", ")", "[", "]", ",", "."]
+
+    # maps are formed from the above lists for constant time access
+    # to check if a token is a keyword or symbol.
     keyword_map = {i:i for i in keyword_list}
     symbol_map = {k:k for k in symbol_list}
 

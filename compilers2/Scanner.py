@@ -6,11 +6,16 @@ class Scanner:
     def __init__(self, input_text):
         self.input_text = input_text
         self.curr_position = 0
-        # self.tokenlist = self.form_tokens()
 
     def all(self):
-        while(True):
-            print self.next()
+        try:
+            token = self.next()
+            while(not token.kind == 4):
+                sys.stdout.write(str(token) + '\n')
+                token = self.next()
+            sys.stdout.write(str(self.next()) + '\n')
+        except Exception as e:
+            sys.stdout.write(str(e))
 
     def next(self):
         input_text_length = len(self.input_text)
@@ -40,7 +45,7 @@ class Scanner:
                         self.curr_position += 1
                 if not open_comment_count == closed_comment_count:
                     start_position, end_position = comment_list[len(comment_list)-1]
-                    sys.stderr.write("error: unclosed comment at position ({0}, {1})".format(start_position, end_position))
+                    sys.stderr.write("\nerror: unclosed comment at position ({0}, {1})\n".format(start_position, end_position))
                     error_flag = 1
                     break
 
@@ -86,8 +91,8 @@ class Scanner:
                     self.curr_position+=1
                     return token
             else:
-                sys.stderr.write("error: illegal character \'{0}\' found " \
-                      "at position @({1}, {2})".format(self.input_text[self.curr_position],
+                sys.stderr.write("\nerror: illegal character \'{0}\' found " \
+                      "at position @({1}, {2})\n".format(self.input_text[self.curr_position],
                                                        self.curr_position, self.curr_position))
                 error_flag = 1
                 break
@@ -125,22 +130,21 @@ class Scanner:
             return True
         return False
 
-    def all(self):
-        pass
-
-
+'''
 def main():
     # s = Scanner("VAR ics142: ARRAY 5 OF INTEGER;")
     # s = Scanner("asdf 8_9 * ()^D")
     # s = Scanner("")
     # s = Scanner("VAR (*(*hello*)*) ics142: ARRAY 5 OF INTEGER; (*final*)")
-    # s = Scanner("PROGRAM As3;\nCONST x = -47;TYPE T = RECO$RD f: INTEGER; END; VAR a: 123ARRAY123 12 OF T; BEGINa[7].f := -x/END As3.")
+    s = Scanner("PROGRAM As3;\nCONST x = -47;TYPE T = RECO$RD f: INTEGER; END; VAR a: 123ARRAY123 12 OF T; BEGINa[7].f := -x/END As3.")
     while True:
         try:
             x = raw_input()
             print s.next()
         except Exception as e:
-            print e.strerror
+            pass
 
 main()
+'''
+
 
