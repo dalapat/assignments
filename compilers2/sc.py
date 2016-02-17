@@ -12,8 +12,9 @@ def main():
 
         if sys.argv[1][1] == 's':
             if num_args == 1:
-                # read from stdin
-                print "hello"
+                input_string = sys.stdin.read()
+                s = Scanner(input_string)
+                s.all()
             elif num_args == 2:
                 # read from file
                 f = open(sys.argv[2], 'r')
