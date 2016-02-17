@@ -1,89 +1,101 @@
 from Token import Token
+import sys
 
 class Scanner:
 
     def __init__(self, input_text):
         self.input_text = input_text
-        self.tokenlist = self.form_tokens()
+        self.curr_position = 0
+        # self.tokenlist = self.form_tokens()
 
-    def form_tokens(self):
-        i = 0
+    def all(self):
+        while(True):
+            print self.next()
+
+    def next(self):
         input_text_length = len(self.input_text)
-        tokenlist = []
+        token = Token()
         error_flag = 0
-        while(i < input_text_length):
-            if self.is_whitespace(self.input_text[i]):
-                i += 1
-            elif not i+1 >= input_text_length and self.is_open_comment(self.input_text[i], i):
+        while(self.curr_position < input_text_length):
+            if self.is_whitespace(self.input_text[self.curr_position]):
+                self.curr_position += 1
+            elif not self.curr_position+1 >= input_text_length and \
+                    self.is_open_comment(self.input_text[self.curr_position], self.curr_position):
                 open_comment_count = 1
                 closed_comment_count = 0
                 comment_list = []
-                comment_list.append((i, i+1))
-                i += 2
-                while(i < input_text_length and not open_comment_count == closed_comment_count
-                      and not i+1 >= input_text_length):
-                    if self.is_open_comment(self.input_text[i], i):
+                comment_list.append((self.curr_position, self.curr_position+1))
+                self.curr_position += 2
+                while(self.curr_position < input_text_length and not open_comment_count == closed_comment_count
+                      and not self.curr_position+1 >= input_text_length):
+                    if self.is_open_comment(self.input_text[self.curr_position], self.curr_position):
                         open_comment_count += 1
-                        comment_list.append((i, i+1))
-                        i += 2
-                    elif self.is_closed_comment(self.input_text[i], i):
+                        comment_list.append((self.curr_position, self.curr_position+1))
+                        self.curr_position += 2
+                    elif self.is_closed_comment(self.input_text[self.curr_position], self.curr_position):
                         closed_comment_count += 1
                         comment_list = comment_list[:-1]
-                        i += 2
+                        self.curr_position += 2
                     else:
-                        i += 1
+                        self.curr_position += 1
                 if not open_comment_count == closed_comment_count:
                     start_position, end_position = comment_list[len(comment_list)-1]
-                    print "error: unclosed comment at position ({0}, {1})".format(start_position, end_position)
+                    sys.stderr.write("error: unclosed comment at position ({0}, {1})".format(start_position, end_position))
                     error_flag = 1
                     break
 
-            elif self.is_letter(self.input_text[i]):
+            elif self.is_letter(self.input_text[self.curr_position]):
                 v = []
-                start = i
-                while(i < input_text_length and (self.is_letter(self.input_text[i])
-                                                 or self.is_digit(self.input_text[i]))):
-                    v.append(self.input_text[i])
-                    i += 1
-                end = i-1
+                start = self.curr_position
+                while(self.curr_position < input_text_length and (self.is_letter(self.input_text[self.curr_position])
+                                                 or self.is_digit(self.input_text[self.curr_position]))):
+                    v.append(self.input_text[self.curr_position])
+                    self.curr_position += 1
+                end = self.curr_position-1
                 v_string = ''.join(v)
                 try:
                     token_string = Token.keyword_map[v_string]
                     token = Token(kind=2, keyword_value=token_string,
                                   start_position=start, end_position=end)
-                    tokenlist.append(token)
+                    return token
                 except:
                     token = Token(kind=1, identifier_value=v_string,
                                   start_position=start, end_position=end)
-                    tokenlist.append(token)
-            elif self.is_digit(self.input_text[i]):
+                    return token
+            elif self.is_digit(self.input_text[self.curr_position]):
                 v = 0
-                start = i
-                while(i < input_text_length and self.is_digit(self.input_text[i])):
-                    v = (10*v) + int(self.input_text[i])
-                    i += 1
-                end = i-1
+                start = self.curr_position
+                while(self.curr_position < input_text_length and self.is_digit(self.input_text[self.curr_position])):
+                    v = (10*v) + int(self.input_text[self.curr_position])
+                    self.curr_position += 1
+                end = self.curr_position-1
                 token = Token(kind=0, int_value=v, start_position=start, end_position=end)
-                tokenlist.append(token)
-            elif self.is_symbol(self.input_text[i]):
-                symbol = self.input_text[i]
-                if(not i == input_text_length-1 and (self.input_text[i]+self.input_text[i+1]) in Token.symbol_map):
-                    symbol = self.input_text[i] + self.input_text[i+1]
-                    token = Token(kind=3, symbol_value=symbol, start_position=i, end_position=i+1)
-                    tokenlist.append(token)
-                    i+=2
+                return token
+            elif self.is_symbol(self.input_text[self.curr_position]):
+                symbol = self.input_text[self.curr_position]
+                if(not self.curr_position == input_text_length-1 and
+                           (self.input_text[self.curr_position]+self.input_text[self.curr_position+1]) in Token.symbol_map):
+                    symbol = self.input_text[self.curr_position] + self.input_text[self.curr_position+1]
+                    token = Token(kind=3, symbol_value=symbol,
+                                  start_position=self.curr_position, end_position=self.curr_position+1)
+                    self.curr_position+=2
+                    return token
                 else:
-                    token = Token(kind=3, symbol_value=symbol, start_position=i, end_position=i)
-                    tokenlist.append(token)
-                    i+=1
+                    token = Token(kind=3, symbol_value=symbol,
+                                  start_position=self.curr_position, end_position=self.curr_position)
+                    self.curr_position+=1
+                    return token
             else:
-                print "error: illegal character \'{0}\' found " \
-                      "at position @({1}, {2})".format(self.input_text[i], i, i)
+                sys.stderr.write("error: illegal character \'{0}\' found " \
+                      "at position @({1}, {2})".format(self.input_text[self.curr_position],
+                                                       self.curr_position, self.curr_position))
                 error_flag = 1
                 break
         if error_flag == 0:
-            tokenlist.append(Token(kind=4, eof_value="eof", start_position=i, end_position=i))
-        return tokenlist
+            token = Token(kind=4, eof_value="eof", start_position=self.curr_position, end_position=self.curr_position)
+            return token
+        else:
+            exit()
 
     def is_whitespace(self, c):
         return c == ' ' or c == '\t' or c == '\n' or c == '\r'
@@ -113,19 +125,22 @@ class Scanner:
             return True
         return False
 
-    def next(self):
-        pass
-
     def all(self):
         pass
+
 
 def main():
     # s = Scanner("VAR ics142: ARRAY 5 OF INTEGER;")
     # s = Scanner("asdf 8_9 * ()^D")
-    # s = Scanner("VAR ics142: ARRAY 5 OF INTEGER; (*final*)")
-    # s = Scanner("(*")
+    # s = Scanner("")
+    # s = Scanner("VAR (*(*hello*)*) ics142: ARRAY 5 OF INTEGER; (*final*)")
     # s = Scanner("PROGRAM As3;\nCONST x = -47;TYPE T = RECO$RD f: INTEGER; END; VAR a: 123ARRAY123 12 OF T; BEGINa[7].f := -x/END As3.")
-    for elem in s.tokenlist:
-        print elem
+    while True:
+        try:
+            x = raw_input()
+            print s.next()
+        except Exception as e:
+            print e.strerror
 
 main()
+

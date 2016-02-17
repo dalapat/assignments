@@ -5,7 +5,6 @@ class Token():
                     "THEN", "END", "MOD", "DO", "RECORD", "UNTIL"]
     symbol_list = ["+", "-", "*", ":", ";", "=", "<", ">", "<=",
                    ">=", "#", ":=", "(", ")", "[", "]", ",", "."]
-    # peek symbols, : -> := | < -> <= | > -> >= | ( -> (*
     keyword_map = {i:i for i in keyword_list}
     symbol_map = {k:k for k in symbol_list}
 
