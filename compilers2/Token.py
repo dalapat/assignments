@@ -9,14 +9,15 @@ class Token():
     keyword_map = {i:i for i in keyword_list}
     symbol_list = {k:k for k in symbol_list}
 
-    def __init__(self):
-        self.kind = 0 #integer=0, identifier=1, keyword=2, symbol=3, eof=4
-        self.int_value = 0
-        self.identifier_value = ""
-        self.keyword_value = ""
-        self.symbol = ""
-        self.start_position = 0
-        self.end_position = 0
+    def __init__(self, kind=0, int_value=0, identifier_value="", keyword_value="",
+                 symbol="", start_position=0, end_position=0):
+        self.kind = kind #integer=0, identifier=1, keyword=2, symbol=3, eof=4
+        self.int_value = int_value
+        self.identifier_value = identifier_value
+        self.keyword_value = keyword_value
+        self.symbol = symbol
+        self.start_position = start_position
+        self.end_position = end_position
 
     def __str__(self):
         output_string = ""

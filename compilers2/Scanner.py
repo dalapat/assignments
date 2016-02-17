@@ -6,7 +6,27 @@ class Scanner:
         self.input_text = input_text
 
     def form_tokens(self):
-        pass
+        tokenlist = []
+        i = 0
+        input_text_length = len(self.input_text)
+        while(i < input_text_length):
+            if self.is_whitespace(self.input_text[i]):
+                i += 1
+            elif self.is_letter(self.input_text[i]):
+                pass
+            elif self.is_digit(self.input_text[i]):
+                v = 0
+                start = i
+                while(i < input_text_length and self.is_digit(self.input_text[i])):
+                    v = (10*v) + int(self.input_text[i])
+                    i += 1
+                end = i
+                token = Token(kind=0, int_value=v, start_position=start, end_position=end)
+                tokenlist.append(token)
+            elif self.is_symbol(self.input_text[i]):
+                pass
+            else:
+                print "error"
 
     def is_whitespace(self, c):
         return c == ' ' or c == '\t' or c == '\n' or c == '\r'
