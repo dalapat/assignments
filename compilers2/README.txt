@@ -9,6 +9,11 @@ Usage:
 
 ./sc -s filename.txt
 
+I had to change permissions on sc to run it the first time. You may have 
+to do the same. If you get a permission denied error, run
+
+chmod a+x sc
+
 filename.txt is expected to have simple code. if illegal characters are found
 an error message will be produced highlighting the illegal character.
 
@@ -38,7 +43,7 @@ For comments, if a comment is not closed, an error will be printed and the
 program will stop parsing. The position given is the position of the most
 recently opened comment that has not been closed
 
-all() returns a list of tokens. it does not print. printing occurs in main.
+all() returns a token list. it does not print tokens.printing occurs in main.
 If an error occurs, it will print to stderr in all(), then the partial token
 list is printed. In other words, you will see the error printed first, then
 the partial token list. I checked with Dr. Froehlich to see if this format is
