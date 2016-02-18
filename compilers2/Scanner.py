@@ -2,21 +2,32 @@ from Token import Token
 import sys
 
 class Scanner:
+    """
+    Reads an input string and creates tokens. Tokens can be generated one by one by
+    calling next() or a
+    """
 
+    # initializes a Scanner with the text to parse for tokens
+    # as well as a pointer to the current character being parsed
     def __init__(self, input_text):
-        self.input_text = input_text
-        self.curr_position = 0
+        self.input_text = input_text # text to parse for Tokens
+        self.curr_position = 0 # current character in input_text
 
+    # return all tokens found in input_text
     def all(self):
+        token_list = []
         try:
             token = self.next()
             while(not token.kind == 4):
                 sys.stdout.write(str(token) + '\n')
+                token_list.append(token)
                 token = self.next()
-            sys.stdout.write(str(self.next()) + '\n')
+            token = self.next()
+            sys.stdout.write(str(token) + '\n')
+            token_list.append(token)
         except Exception as e:
             sys.stdout.write(str(e))
-
+        return token_list
     def next(self):
         input_text_length = len(self.input_text)
         token = Token()
@@ -102,15 +113,19 @@ class Scanner:
         else:
             exit()
 
+    # check if a character is a whitespace or string formatting character
     def is_whitespace(self, c):
         return c == ' ' or c == '\t' or c == '\n' or c == '\r'
 
+    # check if a character is a beginning to a comment
     def is_open_comment(self, c, i):
         return (c+self.input_text[i+1]) == "(*"
 
+    # check if a character is a closing comment
     def is_closed_comment(self, c, i):
         return (c+self.input_text[i+1]) == "*)"
 
+    # check if a character is a letter
     def is_letter(self, c):
         # if scanner reads a letter, it could be a keyword or an identifier
         letter_alphabet = list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -118,12 +133,14 @@ class Scanner:
             return True
         return False
 
+    # check if a character is in the symbol map defined in Token
     def is_symbol(self, c):
         single_char_symbol_alphabet = list("+-*:;=<>#:()[],.")
         if c in single_char_symbol_alphabet:
             return True
         return False
 
+    # check if a character is a digit
     def is_digit(self, c):
         number_alphabet = list("0123456789")
         if c in number_alphabet:

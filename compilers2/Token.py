@@ -1,4 +1,11 @@
 class Token():
+
+    """
+    This class represents a single token. A token contains a "kind" field to represent
+    whether its an integer, an identifier, a keyword, a symbol, or an EOF.
+    This class also contains a list of all valid keywords and symbols, though
+    the actual error checking is done in Scanner.
+    """
     # list of all valid keywords
     keyword_list = ["CONST", "PROGRAM", "BEGIN", "END", "TYPE", "VAR",
                     "ARRAY", "IF", "OF", "DIV", "ELSE", "REPEAT", "WHILE", "WRITE", "READ",
@@ -12,17 +19,19 @@ class Token():
     keyword_map = {i:i for i in keyword_list}
     symbol_map = {k:k for k in symbol_list}
 
+    # initialize a generic token
     def __init__(self, kind=0, int_value=0, identifier_value="", keyword_value="",
                  symbol_value="", eof_value = "eof", start_position=0, end_position=0):
         self.kind = kind #integer=0, identifier=1, keyword=2, symbol=3, eof=4
-        self.int_value = int_value
-        self.identifier_value = identifier_value
-        self.keyword_value = keyword_value
-        self.symbol_value = symbol_value
-        self.eof_value = eof_value
-        self.start_position = start_position
-        self.end_position = end_position
+        self.int_value = int_value # actual integer value if integer
+        self.identifier_value = identifier_value # actual identifier value if identifier
+        self.keyword_value = keyword_value # actual keyword value if keyword
+        self.symbol_value = symbol_value # actual symbol value if symbol
+        self.eof_value = eof_value # token returned to represent eof
+        self.start_position = start_position # position where current token was found
+        self.end_position = end_position # position where current token ends
 
+    # print custom attributes of token
     def __str__(self):
         output_string = ""
         if self.kind == 0:

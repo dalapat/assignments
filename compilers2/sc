@@ -15,7 +15,7 @@ def main():
             if num_args == 1:
                 input_string = sys.stdin.read()
                 s = Scanner(input_string)
-                s.all()
+                token_list = s.all()
             elif num_args == 2:
                 # read from file
                 if os.path.isfile(sys.argv[2]):
@@ -24,7 +24,7 @@ def main():
                     for line in f:
                         input_line += line
                     s = Scanner(input_line)
-                    s.all()
+                    token_list = s.all()
                     f.close()
                 else:
                     sys.stderr.write("error: file \"{0}\" not found\n".format(sys.argv[2]))
