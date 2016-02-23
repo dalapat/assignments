@@ -6,7 +6,7 @@ import sys
 
 class Parser:
 
-    def __init__(self, token_list):
+    def __init__(self, token_list=[]):
         self.current = 0
         self.token_list = token_list
         # find another way to access kind map
@@ -254,7 +254,7 @@ class Parser:
                 self.match("]")
             elif self.token_list[self.current].kind == self.kind_map["."]:
                 self.match(".")
-                self._identifier()
+                self.match("IDENTIFIER")
             else:
                 sys.stderr.write("error: not a valid selector "
                              "@({0}, {1})".format(self.token_list[self.current].start_position,
@@ -275,6 +275,7 @@ class Parser:
             self.match(",")
             self._expression()
 
+'''
 def main():
     # if there is an error in scanner, how do i stop the program?
     # how many errors should show up?
@@ -296,3 +297,4 @@ def main():
     except:
         pass
 main()
+'''
