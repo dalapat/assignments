@@ -42,9 +42,9 @@ class Parser:
 
     def _declarations(self):
         print "Declarations"
-        while (self.token_list[self.current].kind == self.kind_map["CONST"] or
-            self.token_list[self.current].kind == self.kind_map["TYPE"] or
-            self.token_list[self.current].kind == self.kind_map["VAR"]):
+        while (self.token_list[self.current].kind == self.kind_map["CONST"]) or \
+            (self.token_list[self.current].kind == self.kind_map["TYPE"]) or \
+            (self.token_list[self.current].kind == self.kind_map["VAR"]):
             if self.token_list[self.current].kind == self.kind_map["CONST"]:
                 self._constdecl()
             elif self.token_list[self.current].kind == self.kind_map["TYPE"]:
@@ -69,7 +69,7 @@ class Parser:
         while self.token_list[self.current].kind == self.kind_map["IDENTIFIER"]:
             self.match("IDENTIFIER")
             self.match("=")
-            self._expression()
+            self._type()
             self.match(";")
 
     def _vardecl(self):
@@ -115,11 +115,7 @@ class Parser:
             elif self.token_list[self.current].kind == self.kind_map["-"]:
                 self.match("-")
             else:
-                sys.stderr.write("error: expected token kind \'{0}\', "
-                             "received unexpected token \'{1}\'"
-                             " @({2}, {3})".format(kind, self.token_list[self.current],
-                                                   self.token_list[self.current].start_position,
-                                                   self.token_list[self.current].end_position) + '\n')
+                sys.stderr.write("error: some error")
             self._term()
 
     def _term(self):
@@ -273,9 +269,20 @@ class Parser:
 
 def main():
     # if there is an error in scanner, how do i stop the program?
+    # how many errors should show up?
+    # strong and weak?
     try:
-        s = Scanner("PROGRAM X; VAR i: INTEGER; END X.")
+
+        f = open("test.txt", 'r')
+        input_line = ""
+        for line in f:
+            input_line += line
+        s = Scanner(input_line)
         token_list = s.all()
+        #for token in token_list:
+        #    sys.stdout.write(str(token) + '\n')
+        f.close()
+        # token_list = s.all()
         p = Parser(token_list)
         p.parse()
     except:
