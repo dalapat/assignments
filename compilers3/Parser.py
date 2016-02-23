@@ -124,6 +124,14 @@ class Parser:
         while (self.token_list[self.current].kind == self.kind_map["*"])or \
             (self.token_list[self.current].kind == self.kind_map["DIV"]) or \
             (self.token_list[self.current].kind == self.kind_map["MOD"]):
+            if self.token_list[self.current].kind == self.kind_map["*"]:
+                self.match("*")
+            elif self.token_list[self.current].kind == self.kind_map["DIV"]:
+                self.match("DIV")
+            elif self.token_list[self.current].kind == self.kind_map["MOD"]:
+                self.match("MOD")
+            else:
+                sys.stderr.out("error: term")
             self._factor()
 
     def _factor(self):
@@ -202,7 +210,6 @@ class Parser:
     def _condition(self):
         print "Condition"
         self._expression()
-        ("="|"#"|"<"|">"|"<="|">=")
         if self.token_list[self.current].kind == self.kind_map["="]:
             self.match("=")
         elif self.token_list[self.current].kind == self.kind_map["#"]:
@@ -219,6 +226,7 @@ class Parser:
             sys.stderr.write("error: not a valid condition "
                              "@({0}, {1})".format(self.token_list[self.current].start_position,
                                                   self.token_list[self.current].end_position))
+        self._expression()
 
     def _write(self):
         print "Write"
