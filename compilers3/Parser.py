@@ -9,7 +9,7 @@ class Parser:
     def __init__(self, token_list):
         self.current = 0
         self.token_list = token_list
-        # fix this
+        # find another way to access kind map
         t = Token()
         self.kind_map = t.kind_map
 
@@ -18,11 +18,14 @@ class Parser:
 
     def match(self, kind):
         if self.token_list[self.current].kind == self.kind_map[kind]:
-            sys.stdout.write(self.token_list[self.current])
+            sys.stdout.write(str(self.token_list[self.current]) + "\n")
             self.current += 1
         else:
-            sys.stderr.write("error: expected token kind {0}, "
-                             "received unexpected token {1}".format(kind, self.token_list[self.current]))
+            sys.stderr.write("error: expected token kind \'{0}\', "
+                             "received unexpected token \'{1}\'"
+                             " @({2}, {3})".format(kind, self.token_list[self.current],
+                                                   self.token_list[self.current].start_position,
+                                                   self.token_list[self.current].end_position) + '\n')
 
     def _program(self):
         print "Program"
@@ -112,8 +115,11 @@ class Parser:
             elif self.token_list[self.current].kind == self.kind_map["-"]:
                 self.match("-")
             else:
-                sys.stderr.write("error: expected {0}, received unexpected "
-                                 "token {1}".format("+ or -", self.token_list[self.current]))
+                sys.stderr.write("error: expected token kind \'{0}\', "
+                             "received unexpected token \'{1}\'"
+                             " @({2}, {3})".format(kind, self.token_list[self.current],
+                                                   self.token_list[self.current].start_position,
+                                                   self.token_list[self.current].end_position) + '\n')
             self._term()
 
     def _term(self):
@@ -160,7 +166,9 @@ class Parser:
         elif self.token_list[self.current].kind == self.kind_map["WRITE"]:
             self._write()
         else:
-            sys.stderr.write("error: instruction method")
+            sys.stderr.write("error: not a valid instruction "
+                             "@({0}, {1})".format(self.token_list[self.current].start_position,
+                                                  self.token_list[self.current].end_position))
 
     def _assign(self):
         print "Assign"
@@ -212,7 +220,9 @@ class Parser:
         elif self.token_list[self.current].kind == self.kind_map[">="]:
             self.match(">=")
         else:
-            sys.stderr.write("error: condition method")
+            sys.stderr.write("error: not a valid condition "
+                             "@({0}, {1})".format(self.token_list[self.current].start_position,
+                                                  self.token_list[self.current].end_position))
 
     def _write(self):
         print "Write"
@@ -225,28 +235,49 @@ class Parser:
         self._designator()
 
     def _designator(self):
-        
+        print "Designator"
+        self.match("IDENTIFIER")
+        self._selector()
+
 
     def _selector(self):
-        pass
+        print "Selector"
+        while (self.token_list[self.current].kind == self.kind_map["["]) \
+                or (self.token_list[self.current].kind == self.kind_map["."]):
+            if self.token_list[self.current].kind == self.kind_map["["]:
+                self.match("[")
+                self._expression_list()
+                self.match("]")
+            elif self.token_list[self.current].kind == self.kind_map["."]:
+                self.match(".")
+                self._identifier()
+            else:
+                sys.stderr.write("error: not a valid selector "
+                             "@({0}, {1})".format(self.token_list[self.current].start_position,
+                                                  self.token_list[self.current].end_position))
+
 
     def _identifier_list(self):
-        pass
+        print "IdentifierList"
+        self.match("IDENTIFIER")
+        while self.token_list[self.current].kind == self.kind_map[","]:
+            self.match(",")
+            self.match("IDENTIFIER")
 
     def _expression_list(self):
-        pass
-
-    def _identifier(self):
-        pass
-
-    def _integer(self):
-        pass
-
+        print "ExpressionList"
+        self._expression()
+        while self.token_list[self.current].kind == self.kind_map[","]:
+            self.match(",")
+            self._expression()
 
 def main():
-    s = Scanner("")
-
-    token_list = s.all()
-    p = Parser(token_list)
-
+    # if there is an error in scanner, how do i stop the program?
+    try:
+        s = Scanner("PROGRAM X; VAR i: INTEGER; END X.")
+        token_list = s.all()
+        p = Parser(token_list)
+        p.parse()
+    except:
+        pass
 main()
