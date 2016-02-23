@@ -1,0 +1,57 @@
+#!/usr/bin/env python2.7
+from Scanner import Scanner
+import sys
+import os
+
+# driver program for the scanner. user interacts with this class
+def main():
+    # error check the number of arguments passed
+    num_args = len(sys.argv)-1
+    try:
+        if num_args == 0:
+            # user did not enter anything after ./sc
+            sys.stderr.write("\nerror: not enough arguments\n")
+        if num_args > 2:
+            # only expecting -s and filename for this project, so 3 additional arguments is too much
+            sys.stderr.write("\nerror: too many arguments\n")
+
+        # only relevant option for this project is s, so all other
+        # options that will become relevant later will produce
+        # an error currently
+        if sys.argv[1][1] == 's':
+            # test scanner
+            if num_args == 1:
+                # read from standard input
+                input_string = sys.stdin.read()
+                s = Scanner(input_string)
+                token_list = s.all()
+                for token in token_list:
+                    sys.stdout.write(str(token) + '\n')
+            elif num_args == 2:
+                # read from file
+                if os.path.isfile(sys.argv[2]):
+                    f = open(sys.argv[2], 'r')
+                    input_line = ""
+                    for line in f:
+                        input_line += line
+                    s = Scanner(input_line)
+                    token_list = s.all()
+                    for token in token_list:
+                        sys.stdout.write(str(token) + '\n')
+                    f.close()
+                else:
+                    sys.stderr.write("\nerror: file \"{0}\" not found\n".format(sys.argv[2]))
+        elif sys.argv[1][1] == 'c':
+            sys.stderr.write("\nerror: invalid option\n")
+        elif sys.argv[1][1] == 't':
+            sys.stderr.write("\nerror: invalid option\n")
+        elif sys.argv[1][1] == 'a':
+            sys.stderr.write("\nerror: invalid option\n")
+        elif sys.argv[1][1] == 'i':
+            sys.stderr.write("\nerror: invalid option\n")
+        else:
+            sys.stderr.write("\nerror: invalid option\n")
+
+    except Exception as e:
+        pass
+main()
