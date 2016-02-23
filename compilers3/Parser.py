@@ -72,13 +72,35 @@ class Parser:
     def _vardecl(self):
         print "VarDecl"
         self.match("VAR")
-        
+        while self.token_list[self.current].kind == self.kind_map["IDENTIFIER"]:
+            self._identifier_list()
+            self.match(":")
+            self._type()
+            self.match(";")
 
     def _type(self):
-        pass
+        print "Type"
+        if self.token_list[self.current].kind == self.kind_map["IDENTIFIER"]:
+            self.match("IDENTIFIER")
+        elif self.token_list[self.current].kind == self.kind_map["ARRAY"]:
+            self.match("ARRAY")
+            self._expression()
+            self.match("OF")
+            self._type()
+        elif self.token_list[self.current].kind == self.kind_map["RECORD"]:
+            self.match("RECORD")
+            while self.token_list[self.current].kind == self.kind_map["IDENTIFIER"]:
+                self._identifier_list()
+                self.match(":")
+                self._type()
+                self.match(";")
+            self.match("END")
+        else:
+            pass
 
     def _expression(self):
-        pass
+        print "Expression"
+        
 
     def _term(self):
         pass
