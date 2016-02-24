@@ -7,22 +7,23 @@ import sys
 
 class Parser:
 
-    # do we need to handle nested parantheses, and unclosed parantheses?
-    # how to suppress output if error occurs?
-    # how to do observer
+    # how to suppress output if error occurs
+    # switching output on and off?
     # graph
-    # getting kind map from Token
+    # when errors occur, should we break or continue parsing?
 
     def __init__(self, token_list=[]):
         self.current = 0
         self.token_list = token_list
-        # find another way to access kind map
-        # t = Token()
         self.kind_map = Token.kind_map
         self.observer = Observer()
+        self.total_error_flag = 0
 
     def parse(self):
         self._program()
+        if self.total_error_flag == 0:
+            self.observer.print_output()
+
 
     def match(self, kind):
         if self.token_list[self.current].kind == self.kind_map[kind]:
@@ -30,11 +31,13 @@ class Parser:
             self.observer.print_token(self.token_list[self.current])
             self.current += 1
         else:
+            self.total_error_flag = 1
             sys.stderr.write("error: expected token kind \'{0}\', "
                              "received unexpected token \'{1}\'"
                              " @({2}, {3})".format(kind, self.token_list[self.current],
                                                    self.token_list[self.current].start_position,
                                                    self.token_list[self.current].end_position) + '\n')
+            # raise UnexpectedTokenException
 
     def _program(self):
         # print "Program"
@@ -50,6 +53,11 @@ class Parser:
         self.match("IDENTIFIER")
         self.match(".")
         self.observer.end_program()
+        # should an error go here to detect trash?
+        if not self.token_list[self.current].kind == self.kind_map["EOF"]:
+            self.total_error_flag = 1
+            sys.stderr.write("error: trash detected after program end: "
+                             "Token \'{0}\'".format(self.token_list[self.current]) + '\n')
 
     def _declarations(self):
         # print "Declarations"
@@ -65,6 +73,14 @@ class Parser:
                 self._vardecl()
             else:
                 pass
+                # what should happen here?
+                # self.total_error_flag = 1
+                # sys.stderr.write("error: expecting \'CONST\', \'TYPE\', or \'VAR\'" + '\n')
+                # should I break here?
+        # else:
+        #    self.total_error_flag = 1
+        #    sys.stderr.write("error: expecting \'CONST\', \'TYPE\', or \'VAR\'" + '\n')
+        # what should happen here? it says 0 or more
         self.observer.end_declarations()
 
     def _constdecl(self):
@@ -119,7 +135,8 @@ class Parser:
                 self.match(";")
             self.match("END")
         else:
-            pass
+            self.total_error_flag = 1
+            sys.stderr.out("error: expecting Identifier, ARRAY, or RECORD")
         self.observer.end_type()
 
     def _expression(self):
@@ -137,7 +154,8 @@ class Parser:
             elif self.token_list[self.current].kind == self.kind_map["-"]:
                 self.match("-")
             else:
-                sys.stderr.write("error: some error")
+                self.total_error_flag = 1
+                sys.stderr.write("error: expecting \'+\' or \'-\'")
             self._term()
         self.observer.end_expression()
 
@@ -155,7 +173,8 @@ class Parser:
             elif self.token_list[self.current].kind == self.kind_map["MOD"]:
                 self.match("MOD")
             else:
-                sys.stderr.out("error: term")
+                self.total_error_flag = 1
+                sys.stderr.out("error: expecting \'*\', \'DIV\', or \'MOD\'")
             self._factor()
         self.observer.end_term()
 
@@ -171,7 +190,8 @@ class Parser:
             self._expression()
             self.match(")")
         else:
-            sys.stdout.error("error: idk man something's wrong in factor")
+            self.total_error_flag = 1
+            sys.stdout.error("error: expecting integer, identifier or \'(\'")
         self.observer.end_factor()
 
     def _instructions(self):
@@ -200,6 +220,7 @@ class Parser:
         elif self.token_list[self.current].kind == self.kind_map["WRITE"]:
             self._write()
         else:
+            self.total_error_flag = 1
             sys.stderr.write("error: not a valid instruction "
                              "@({0}, {1})".format(self.token_list[self.current].start_position,
                                                   self.token_list[self.current].end_position))
@@ -263,6 +284,7 @@ class Parser:
         elif self.token_list[self.current].kind == self.kind_map[">="]:
             self.match(">=")
         else:
+            self.total_error_flag = 1
             sys.stderr.write("error: not a valid condition "
                              "@({0}, {1})".format(self.token_list[self.current].start_position,
                                                   self.token_list[self.current].end_position))
@@ -304,6 +326,7 @@ class Parser:
                 self.match(".")
                 self.match("IDENTIFIER")
             else:
+                self.total_error_flag = 1
                 sys.stderr.write("error: not a valid selector "
                              "@({0}, {1})".format(self.token_list[self.current].start_position,
                                                   self.token_list[self.current].end_position))

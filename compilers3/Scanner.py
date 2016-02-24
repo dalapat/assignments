@@ -134,7 +134,7 @@ class Scanner:
 
     # check if a character is a whitespace or string formatting character
     def is_whitespace(self, c):
-        return c == ' ' or c == '\t' or c == '\n' or c == '\r'
+        return c == ' ' or c == '\t' or c == '\n' or c == '\r' or c == '\f'
 
     # check if a character is a beginning to a comment
     def is_open_comment(self, c, i):
