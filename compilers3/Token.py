@@ -67,3 +67,26 @@ class Token():
         else:
             output_string = "error: not a valid token"
         return output_string
+
+    def get_token_name(self):
+        output_string = ""
+        if self.kind == 0:
+            # integer
+            output_string = str(self.int_value)
+        elif self.kind == 1:
+            # identifier
+            output_string = self.identifier_value
+        # elif self.kind == 2:
+        elif 2 <= self.kind <= len(self.keyword_list) + 1:
+            # keyword
+            output_string = self.keyword_value
+        # elif self.kind == 3:
+        elif len(self.keyword_list) + 2 <= self.kind <= len(self.symbol_list) + len(self.keyword_list) + 1:
+            # symbol
+            output_string = self.symbol_value
+        elif self.kind == 41:
+            # eof
+            output_string = self.eof_value
+        else:
+            output_string = "error: not a valid token"
+        return output_string

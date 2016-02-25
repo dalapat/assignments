@@ -9,7 +9,8 @@ class DotObserver:
     def print_token(self, token):
         self.output_string += "L{0} [label=\"{1}\", " \
                               "shape=diamond]\n".format(self.node_count,
-                                                        str(token))
+                                                        str(token.get_token_name()))
+        self.output_string += "{0} -> L{1}\n".format(self.stack[len(self.stack)-1], self.node_count)
         self.node_count += 1
 
     def begin_program(self):
