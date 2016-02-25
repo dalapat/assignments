@@ -4,29 +4,34 @@ class Observer:
 
     def __init__(self):
         self.indent = 0
+        self.output_string = ""
 
     def print_token(self, token):
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + str(token) + "\n")
+        self.output_string += pad_string + str(token) + '\n'
+        # sys.stdout.write(pad_string + str(token) + "\n")
 
     def begin_program(self):
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "Program" + '\n')
+        self.output_string += pad_string + "Program" + '\n'
+        # sys.stdout.write(pad_string + "Program" + '\n')
         self.indent += 2
 
 
     def end_program(self):
         self.indent -= 2
+        # print output string after checking error flag
 
     def begin_declarations(self):
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "Declarations" + '\n')
+        self.output_string += pad_string + "Declarations" + '\n'
+        # sys.stdout.write(pad_string + "Declarations" + '\n')
         self.indent += 2
 
     def end_declarations(self):
@@ -36,7 +41,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "ConstDecl" + '\n')
+        self.output_string += pad_string + "ConstDecl" + '\n'
+        # sys.stdout.write(pad_string + "ConstDecl" + '\n')
         self.indent += 2
 
     def end_constdecl(self):
@@ -46,7 +52,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "TypeDecl" + '\n')
+        self.output_string += pad_string + "TypeDecl" + '\n'
+        # sys.stdout.write(pad_string + "TypeDecl" + '\n')
         self.indent += 2
 
     def end_typedecl(self):
@@ -56,7 +63,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "VarDecl" + '\n')
+        self.output_string += pad_string + "VarDecl" + '\n'
+        # sys.stdout.write(pad_string + "VarDecl" + '\n')
         self.indent += 2
 
     def end_vardecl(self):
@@ -66,7 +74,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "Type" + '\n')
+        self.output_string += pad_string + "Type" + '\n'
+        # sys.stdout.write(pad_string + "Type" + '\n')
         self.indent += 2
 
     def end_type(self):
@@ -76,7 +85,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "Expression" + '\n')
+        self.output_string += pad_string + "Expression" + '\n'
+        # sys.stdout.write(pad_string + "Expression" + '\n')
         self.indent += 2
 
     def end_expression(self):
@@ -86,7 +96,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "Term" + '\n')
+        self.output_string += pad_string + "Term" + '\n'
+        # sys.stdout.write(pad_string + "Term" + '\n')
         self.indent += 2
 
     def end_term(self):
@@ -96,7 +107,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "Factor" + '\n')
+        self.output_string += pad_string + "Factor" + '\n'
+        # sys.stdout.write(pad_string + "Factor" + '\n')
         self.indent += 2
 
     def end_factor(self):
@@ -106,7 +118,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "Instructions" + '\n')
+        self.output_string += pad_string + "Instructions" + '\n'
+        # sys.stdout.write(pad_string + "Instructions" + '\n')
         self.indent += 2
 
     def end_instructions(self):
@@ -116,7 +129,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "Instruction" + '\n')
+        self.output_string += pad_string + "Instruction" + '\n'
+        # sys.stdout.write(pad_string + "Instruction" + '\n')
         self.indent += 2
 
     def end_instruction(self):
@@ -126,7 +140,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "Assign" + '\n')
+        self.output_string += pad_string + "Assign" + '\n'
+        # sys.stdout.write(pad_string + "Assign" + '\n')
         self.indent += 2
 
     def end_assign(self):
@@ -136,7 +151,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "If" + '\n')
+        self.output_string += pad_string + "If" + '\n'
+        # sys.stdout.write(pad_string + "If" + '\n')
         self.indent += 2
 
     def end_if(self):
@@ -146,7 +162,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "Repeat" + '\n')
+        self.output_string += pad_string + "Repeat" + '\n'
+        # sys.stdout.write(pad_string + "Repeat" + '\n')
         self.indent += 2
 
     def end_repeat(self):
@@ -156,7 +173,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "While" + '\n')
+        self.output_string += pad_string + "While" + '\n'
+        # sys.stdout.write(pad_string + "While" + '\n')
         self.indent += 2
 
     def end_while(self):
@@ -166,7 +184,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "Condition" + '\n')
+        self.output_string += pad_string + "Condition" + '\n'
+        # sys.stdout.write(pad_string + "Condition" + '\n')
         self.indent += 2
 
     def end_condition(self):
@@ -176,7 +195,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "Write" + '\n')
+        self.output_string += pad_string + "Write" + '\n'
+        # sys.stdout.write(pad_string + "Write" + '\n')
         self.indent += 2
 
     def end_write(self):
@@ -186,7 +206,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "Read" + '\n')
+        self.output_string += pad_string + "Read" + '\n'
+        # sys.stdout.write(pad_string + "Read" + '\n')
         self.indent += 2
 
     def end_read(self):
@@ -196,7 +217,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "Designator" + '\n')
+        self.output_string += pad_string + "Designator" + '\n'
+        # sys.stdout.write(pad_string + "Designator" + '\n')
         self.indent += 2
 
     def end_designator(self):
@@ -206,7 +228,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "Selector" + '\n')
+        self.output_string += pad_string + "Selector" + '\n'
+        # sys.stdout.write(pad_string + "Selector" + '\n')
         self.indent += 2
 
     def end_selector(self):
@@ -216,7 +239,8 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "IdentifierList" + '\n')
+        self.output_string += pad_string + "IdentifierList" + '\n'
+        # sys.stdout.write(pad_string + "IdentifierList" + '\n')
         self.indent += 2
 
     def end_identifier_list(self):
@@ -226,8 +250,12 @@ class Observer:
         pad_string = ""
         for _ in range(self.indent):
             pad_string += " "
-        sys.stdout.write(pad_string + "ExpressionList" + '\n')
+        self.output_string += pad_string + "ExpressionList" + '\n'
+        # sys.stdout.write(pad_string + "ExpressionList" + '\n')
         self.indent += 2
+
+    def print_output(self):
+        sys.stdout.write('\n' + self.output_string)
 
     def end_expression_list(self):
         self.indent -= 2

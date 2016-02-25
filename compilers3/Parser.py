@@ -2,6 +2,7 @@ from UnexpectedTokenException import UnexpectedTokenException
 from Scanner import Scanner
 from Token import Token
 from Observer import Observer
+from DotObserver import DotObserver
 import sys
 
 
@@ -12,18 +13,18 @@ class Parser:
     # graph
     # when errors occur, should we break or continue parsing?
 
-    def __init__(self, token_list=[]):
+    def __init__(self, observer = Observer(), token_list=[]):
         self.current = 0
         self.token_list = token_list
         self.kind_map = Token.kind_map
-        self.observer = Observer()
+        # self.observer = observer
+        self.observer = observer
         self.total_error_flag = 0
 
     def parse(self):
         self._program()
         if self.total_error_flag == 0:
             self.observer.print_output()
-
 
     def match(self, kind):
         if self.token_list[self.current].kind == self.kind_map[kind]:
