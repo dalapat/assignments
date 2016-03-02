@@ -189,7 +189,10 @@ class Parser:
                     self.current_scope.insert(el, record_field_type)
             self.match("END")
             return_type = Record(self.current_scope)
-            self.current_scope = self.current_scope.outer_scope
+            outer_scope = self.current_scope.outer_scope
+            self.current_scope.outer_scope = None
+            self.current_scope = outer_scope
+            return return_type
         else:
             self.total_error_flag = 1
             sys.stderr.out("error: expecting Identifier, ARRAY, or RECORD")
