@@ -114,6 +114,8 @@ class Parser:
             # add it we formed a constant
             if isinstance(e, Constant): # is it constant object or constant name
                 self.program_scope.insert(name, e)
+            else:
+                sys.stderr.write("error: attempted to define const with nonconst object")
         self.observer.end_constdecl()
 
     # set expectation of creating a TypeDecl
@@ -123,10 +125,20 @@ class Parser:
         self.observer.begin_typedecl()
         self.match("TYPE")
         while self.token_list[self.current].kind == self.kind_map["IDENTIFIER"]:
-            self.match("IDENTIFIER")
+            name = self.match("IDENTIFIER")
             self.match("=")
-            self._type()
+            return_type = self._type()
             self.match(";")
+            if return_type is None:
+                sys.stderr.write("error: type not found")
+                return None
+            # do var and type only check in current scope or also outer scope
+            # when do we need to define Variable()?
+            # point of Entry?()
+            if not self.current_scope.find(name):
+                self.current_scope.insert(name, return_type)
+            else:
+                sys.stderr.write("error: attempting to redefine variable")
         self.observer.end_typedecl()
 
     # set expectation of creating a VarDecl
@@ -135,12 +147,22 @@ class Parser:
         # print "VarDecl"
         self.observer.begin_vardecl()
         self.match("VAR")
+        id_list = []
+        return_type = None
         while self.token_list[self.current].kind == self.kind_map["IDENTIFIER"]:
             id_list = self._identifier_list()
             self.match(":")
-            self._type()
+            return_type = self._type()
+            if return_type is None:
+                sys.stderr.write("error: type not found")
+                return None
             self.match(";")
         self.observer.end_vardecl()
+        for name in id_list:
+            if not self.current_scope.local(name):
+                self.current_scope.insert(name, return_type)
+            else:
+                sys.stderr.write("error: attempting to redefine var")
 
     # set expectation of creating a Type
     # by following the Type production
@@ -150,11 +172,11 @@ class Parser:
         return_type = None
         if self.token_list[self.current].kind == self.kind_map["IDENTIFIER"]:
             name = self.match("IDENTIFIER")
-            return_type = self.program_scope.find(name)
+            return_type = self.current_scope.find(name)
             if return_type is None:
                 sys.stderr.write("error: indentifier not found. attempting to assign "
                                  "uncreated type")
-                return
+                return None
             return return_type
         elif self.token_list[self.current].kind == self.kind_map["ARRAY"]:
             self.match("ARRAY")
@@ -168,9 +190,9 @@ class Parser:
             self.match("OF")
             array_type = self._type()
             # check if array_type is already defined
-            if self.program_scope.find(array_type) is None:
+            if self.current_scope.find(array_type) is None:
                 sys.stderr.write("error: array type not found")
-                return return_type
+                return None
             return_type = Array(length, array_type)
             return return_type
         elif self.token_list[self.current].kind == self.kind_map["RECORD"]:
@@ -185,8 +207,12 @@ class Parser:
                 if self.current_scope.find(record_field_type) is None:
                     sys.stderr.write("error: record field type nonexistent")
                 self.match(";")
-                for el in id_list:
-                    self.current_scope.insert(el, record_field_type)
+                for name in id_list:
+                    if not self.current_scope.local(name):
+                        self.current_scope.insert(name, record_field_type)
+                    else:
+                        sys.stderr.write("error: attempting to redefine field")
+                        return None
             self.match("END")
             return_type = Record(self.current_scope)
             outer_scope = self.current_scope.outer_scope
