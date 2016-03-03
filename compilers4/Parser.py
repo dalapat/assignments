@@ -84,6 +84,7 @@ class Parser:
             sys.stderr.write("error: trash detected after program end: "
                              "Token \'{0}\'".format(self.token_list[self.current]) + '\n')
 
+
     # set expectation of creating a declaration
     # by following the declaration production
     def _declarations(self):
@@ -136,10 +137,7 @@ class Parser:
             if return_type is None:
                 sys.stderr.write("error: type not found")
                 return None
-            # do var and type only check in current scope or also outer scope
-            # when do we need to define Variable()?
-            # point of Entry?()
-            if not self.current_scope.find(name):
+            if not self.current_scope.local(name):
                 self.current_scope.insert(name, return_type)
             else:
                 sys.stderr.write("error: attempting to redefine variable")
@@ -163,7 +161,7 @@ class Parser:
             self.match(";")
         self.observer.end_vardecl()
         for name in id_list:
-            if not self.current_scope.local(name): # local or find?
+            if not self.current_scope.local(name):
                 self.current_scope.insert(name, Variable(return_type))
             else:
                 sys.stderr.write("error: attempting to redefine var")
