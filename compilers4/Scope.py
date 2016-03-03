@@ -6,8 +6,8 @@ class Scope:
         self.outer_scope = outer_scope
         self.symbol_table = {}
 
-    def insert(self, name, type):
-        self.symbol_table[name] = type
+    def insert(self, name, _type):
+        self.symbol_table[name] = _type
 
     def find(self, name):
         curr_pointer = -1

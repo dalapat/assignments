@@ -2,9 +2,9 @@ from Entry import Entry
 
 class Constant(Entry):
 
-    def __init__(self, type, value):
+    def __init__(self, _type, value):
         # what's the point of Entry?
-        self.type = type
+        self._type = _type
         self.value = value #make this 5 for now
 
     def get_value(self):

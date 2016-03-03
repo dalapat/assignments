@@ -2,5 +2,5 @@ from Entry import Entry
 
 class Variable(Entry):
 
-    def __init__(self, type):
-        self.type = type # what is type? should we pass it?
+    def __init__(self, _type):
+        self._type = _type

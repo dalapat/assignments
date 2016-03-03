@@ -2,6 +2,6 @@ from Type import Type
 
 class Array(Type):
 
-    def __init__(self, length, type):
+    def __init__(self, length, _type):
         self.length = length
-        self.type = type
+        self._type = _type

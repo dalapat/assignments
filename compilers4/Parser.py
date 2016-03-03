@@ -8,6 +8,8 @@ from Constant import Constant
 from Integer import Integer
 from Array import Array
 from Record import Record
+from Variable import Variable
+from Type import Type
 import sys
 
 
@@ -64,16 +66,18 @@ class Parser:
         # print "Program"
         self.observer.begin_program()
         self.match("PROGRAM")
-        self.match("IDENTIFIER")
+        name = self.match("IDENTIFIER")
         self.match(";")
         self._declarations()
         if self.token_list[self.current].kind == self.kind_map["BEGIN"]:
             self.match("BEGIN")
             self._instructions()
         self.match("END")
-        self.match("IDENTIFIER")
+        end_name = self.match("IDENTIFIER")
         self.match(".")
         self.observer.end_program()
+        if not name == end_name:
+            sys.stderr.write("error: program identifier does not match end identifier")
         # should an error go here to detect trash?
         if not self.token_list[self.current].kind == self.kind_map["EOF"]:
             self.total_error_flag = 1
@@ -159,8 +163,8 @@ class Parser:
             self.match(";")
         self.observer.end_vardecl()
         for name in id_list:
-            if not self.current_scope.local(name):
-                self.current_scope.insert(name, return_type)
+            if not self.current_scope.local(name): # local or find?
+                self.current_scope.insert(name, Variable(return_type))
             else:
                 sys.stderr.write("error: attempting to redefine var")
 
@@ -172,11 +176,17 @@ class Parser:
         return_type = None
         if self.token_list[self.current].kind == self.kind_map["IDENTIFIER"]:
             name = self.match("IDENTIFIER")
+            # find or local?
             return_type = self.current_scope.find(name)
+            # return_type = self.current_scope.local(name)
             if return_type is None:
                 sys.stderr.write("error: indentifier not found. attempting to assign "
                                  "uncreated type")
                 return None
+            # how to enforce this is a type?
+            # can I just throw an error if its a const or variable?
+            if isinstance(return_type, Type):
+                self.current_scope.insert(name, return_type)
             return return_type
         elif self.token_list[self.current].kind == self.kind_map["ARRAY"]:
             self.match("ARRAY")
