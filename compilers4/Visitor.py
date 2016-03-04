@@ -1,11 +1,13 @@
 import sys
 
 class Visitor:
-    # visitor patter in python
+    # text visitor pattern in python used for outputting symbol table
 
+    # initialize a text visitor with 0 left padding
     def __init__(self):
         self.indent = 0
 
+    # output the names in a scope
     def visitScope(self, scope):
         self.write("SCOPE BEGIN\n")
         self.indent += 2
@@ -15,12 +17,14 @@ class Visitor:
         self.indent -= 2
         self.write("END SCOPE\n")
 
+    # format a string with proper padding
     def write(self, string):
         pad_string  = ""
         for _ in range(self.indent):
             pad_string += " "
         sys.stdout.write(pad_string + string)
 
+    # output the fields of a record
     def visitRecord(self, record):
         self.indent += 2
         self.write("RECORD BEGIN\n")
@@ -31,6 +35,7 @@ class Visitor:
         self.write("END RECORD\n")
         self.indent -= 2
 
+    # output the length and type of an array
     def visitArray(self, array):
         self.indent += 2
         self.write("ARRAY BEGIN\n")
@@ -45,6 +50,7 @@ class Visitor:
         self.write("END ARRAY\n")
         self.indent -= 2
 
+    # output the type of a variable
     def visitVar(self, var):
         self.indent += 2
         self.write("VAR BEGIN\n")
@@ -55,6 +61,7 @@ class Visitor:
         self.write("END VAR\n")
         self.indent -= 2
 
+    # output the value and type of a constant
     def visitConst(self, const):
         self.indent += 2
         self.write("CONST BEGIN\n")
@@ -69,6 +76,7 @@ class Visitor:
         self.write("END CONST\n")
         self.indent -= 2
 
+    # output "INTEGER"
     def visitInt(self):
         self.indent += 2
         self.write("INTEGER\n")

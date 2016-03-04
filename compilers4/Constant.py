@@ -1,12 +1,14 @@
 from Entry import Entry
 
 class Constant(Entry):
+    # represent a constant in Simple
 
+    # initialize a Constant with type and value
     def __init__(self, _type, value):
-        # what's the point of Entry?
         self._type = _type
-        self.value = value #make this 5 for now
+        self.value = value
 
+    # output the type and value
     def visit(self, visitor):
         visitor.visitConst(self)
 

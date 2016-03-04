@@ -31,14 +31,11 @@ class Parser:
         self.kind_map = Token.kind_map # dictionary of token kinds
         self.observer = observer # output class determined by cmd line arguments
         self.total_error_flag = 0 # detects if an error occurs anywhere in the program
-        ###
-        self.universe = Scope(None)
-        # self.integer_object = Integer()
-        self.universe.insert("INTEGER", Integer())
-        # self.universe.insert(self.integer_object, self.integer_object)
-        self.program_scope = Scope(self.universe)
-        self.current_scope = self.program_scope
-        self.print_symbol_table = print_symbol_table
+        self.universe = Scope(None) # universe scope
+        self.universe.insert("INTEGER", Integer()) # universe scope only holds integer
+        self.program_scope = Scope(self.universe) # program scope to hold program names
+        self.current_scope = self.program_scope # current scope for switching between scopes
+        self.print_symbol_table = print_symbol_table # determines whether to print cst or st
 
     # parse the token list
     def parse(self):
@@ -88,14 +85,10 @@ class Parser:
         if not name == end_name:
             self.total_error_flag = 1
             sys.stderr.write("error: program identifier does not match end identifier\n")
-        # should an error go here to detect trash?
         if not self.token_list[self.current].kind == self.kind_map["EOF"]:
             self.total_error_flag = 1
             sys.stderr.write("error: trash detected after program end:\n"
                              "Token \'{0}\'".format(self.token_list[self.current]) + '\n')
-        '''if self.print_symbol_table == 1:
-            visitor = Visitor()
-            visitor.visitScope(self.program_scope)'''
 
     # set expectation of creating a declaration
     # by following the declaration production
@@ -146,6 +139,7 @@ class Parser:
         while self.token_list[self.current].kind == self.kind_map["IDENTIFIER"]:
             name = self.match("IDENTIFIER")
             self.match("=")
+            # type of current Type
             return_type = self._type()
             self.match(";")
             if return_type is None:
@@ -171,6 +165,7 @@ class Parser:
             id_list = self._identifier_list()
             self.match(":")
             return_type = self._type()
+            # type of current identifier
             if return_type is None:
                 self.total_error_flag = 1
                 sys.stderr.write("error: type not found\n")
@@ -183,12 +178,6 @@ class Parser:
                     self.total_error_flag = 1
                     sys.stderr.write("error: attempting to redefine var\n")
         self.observer.end_vardecl()
-        '''for name in id_list:
-            if not self.current_scope.local(name):
-                self.current_scope.insert(name, Variable(return_type))
-            else:
-                self.total_error_flag = 1
-                sys.stderr.write("error: attempting to redefine var\n")'''
 
     # set expectation of creating a Type
     # by following the Type production
@@ -198,19 +187,15 @@ class Parser:
         return_type = None
         if self.token_list[self.current].kind == self.kind_map["IDENTIFIER"]:
             name = self.match("IDENTIFIER")
-            # find or local?
+            # get the name of an identifier
             return_type = self.current_scope.find(name)
-            # return_type = self.current_scope.local(name)
             if return_type is None:
                 self.total_error_flag = 1
                 sys.stderr.write("error: indentifier not found. attempting to assign "
                                  "uncreated type\n")
                 self.observer.end_type()
                 return None
-            # how to enforce this is a type?
-            # can I just throw an error if its a const or variable?
             if isinstance(return_type, Type):
-                # self.current_scope.insert(name, return_type)
                 self.observer.end_type()
                 return return_type
             else:
@@ -221,16 +206,15 @@ class Parser:
             self.match("ARRAY")
             length = None
             e = self._expression()
-            ###
+            # get length of array
             if isinstance(e, Constant):
-                length = e # should this be constant object or actual value?
+                length = e
             else:
                 self.total_error_flag = 1
                 sys.stderr.write("error: not a valid type for array length\n")
             self.match("OF")
             array_type = self._type()
             # check if array_type is already defined
-            # if self.current_scope.find(array_type) is None:
             if array_type is None:
                 self.total_error_flag = 1
                 sys.stderr.write("error: array type not found\n")
@@ -246,8 +230,8 @@ class Parser:
             while self.token_list[self.current].kind == self.kind_map["IDENTIFIER"]:
                 id_list = self._identifier_list()
                 self.match(":")
+                # type of current identifier(s)
                 record_field_type = self._type()
-                # check = self.current_scope.find(record_field_type)
                 if record_field_type is None:
                     self.total_error_flag = 1
                     sys.stderr.write("error: record field type nonexistent\n")
@@ -270,12 +254,10 @@ class Parser:
             self.total_error_flag = 1
             sys.stderr.out("error: expecting Identifier, ARRAY, or RECORD\n")
         self.observer.end_type()
-        # do i need to modify the observer stuff for this assignment?
 
     # set expectation of creating a Expression
     # by following the Expression production
     def _expression(self):
-        # print "Expression"
         self.observer.begin_expression()
         if self.token_list[self.current].kind == self.kind_map["+"]:
             self.match("+")
@@ -293,7 +275,6 @@ class Parser:
                 sys.stderr.write("error: expecting \'+\' or \'-\'\n")
             self._term()
         self.observer.end_expression()
-        # e = Constant(self.universe.find("INTEGER"), 5)
         e = Constant(self.universe.find("INTEGER"), 5)
         return e
 
@@ -349,7 +330,6 @@ class Parser:
     def _instruction(self):
         # print "Instruction"
         self.observer.begin_instruction()
-        # is this bad that i check directly for identifier?
         if self.token_list[self.current].kind == self.kind_map["IDENTIFIER"]:
             self._assign()
         elif self.token_list[self.current].kind == self.kind_map["IF"]:
