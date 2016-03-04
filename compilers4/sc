@@ -2,7 +2,9 @@
 from Scanner import Scanner
 from Parser import Parser
 from Observer import Observer
+from Visitor import Visitor
 from DotObserver import DotObserver
+from DotVisitor import DotVisitor
 import sys
 import os
 
@@ -54,7 +56,13 @@ def main():
                 p.parse()
             elif num_args == 2:
                 # read from file
-                if os.path.isfile(sys.argv[2]):
+                if sys.argv[2] == "-g":
+                    input_string = sys.stdin.read()
+                    s = Scanner(input_string)
+                    token_list = s.all()
+                    p = Parser(observer = DotObserver(), token_list = token_list)
+                    p.parse()
+                elif os.path.isfile(sys.argv[2]):
                     f = open(sys.argv[2], 'r')
                     input_line = ""
                     for line in f:
@@ -78,14 +86,54 @@ def main():
                     f.close()
                     if sys.argv[2] == "-g":
                         p = Parser(observer = DotObserver(), token_list = token_list)
+                        p.parse()
                     else:
-                        p = Parser(observer = Observer(), token_list = token_list)
-                    p.parse()
+                        # p = Parser(observer = Observer(), token_list = token_list)
+                        sys.stderr.write("error: invalid argument\n")
+                    # p.parse()
                 else:
                     sys.stderr.write("\nerror: file \"{0}\" not found\n".format(sys.argv[2]))
 
         elif sys.argv[1][1] == 't':
-            sys.stderr.write("\nerror: invalid option\n")
+            if num_args == 1:
+                # stdin
+                input_line = sys.stdin.read()
+                s = Scanner(input_line)
+                token_list = s.all()
+                p = Parser(observer=Observer(), token_list=token_list, print_symbol_table=1)
+                p.parse()
+            elif num_args == 2:
+                # read from file
+                if sys.argv[2] == "-g":
+                    input_line = sys.stdin.read()
+                    s = Scanner(input_line)
+                    token_list = s.all()
+                    p = Parser(token_list=token_list, print_symbol_table=1, visitor=DotVisitor())
+                if os.path.isfile(sys.argv[2]):
+                    f = open(sys.argv[2], 'r')
+                    input_line = ""
+                    for line in f:
+                        input_line += line
+                    s = Scanner(input_line)
+                    token_list = s.all()
+                    f.close()
+                    p = Parser(token_list = token_list, print_symbol_table=1, visitor=Visitor())
+                    p.parse()
+                else:
+                    sys.stderr.write("\nerror: file \"{0}\" not found\n".format(sys.argv[2]))
+            elif num_args == 3:
+                if os.path.isfile(sys.argv[3]):
+                    f = open(sys.argv[3], 'r')
+                    input_line = ""
+                    for line in f:
+                        input_line += line
+                    s = Scanner(input_line)
+                    token_list = s.all()
+                    f.close()
+                    p = Parser(token_list = token_list, print_symbol_table=1, visitor=DotVisitor())
+                    p.parse()
+                else:
+                    sys.stderr.write("\nerror: file \"{0}\" not found\n".format(sys.argv[3]))
         elif sys.argv[1][1] == 'a':
             sys.stderr.write("\nerror: invalid option\n")
         elif sys.argv[1][1] == 'i':

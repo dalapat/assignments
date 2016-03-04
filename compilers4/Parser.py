@@ -25,7 +25,7 @@ class Parser:
 
     # initializes Parser instance and parses a list of tokens
     # cmd line arguments determine output type
-    def __init__(self, observer = Observer(), token_list=[], print_symbol_table = 0):
+    def __init__(self, observer = Observer(), token_list=[], print_symbol_table = 0, visitor = Visitor()):
         self.current = 0 # current position in token list
         self.token_list = token_list # token list received from scanner
         self.kind_map = Token.kind_map # dictionary of token kinds
@@ -36,6 +36,7 @@ class Parser:
         self.program_scope = Scope(self.universe) # program scope to hold program names
         self.current_scope = self.program_scope # current scope for switching between scopes
         self.print_symbol_table = print_symbol_table # determines whether to print cst or st
+        self.visitor = visitor
 
     # parse the token list
     def parse(self):
@@ -45,15 +46,14 @@ class Parser:
             if self.print_symbol_table == 0:
                 self.observer.print_output()
             elif self.print_symbol_table == 1:
-                visitor = Visitor()
-                visitor.visitScope(self.program_scope)
+                self.visitor.visitScope(self.program_scope)
+
 
     # check if the currently parsed token is a token we are
     # expecting to find
     # kind = expected kind of token
     def match(self, kind):
         if self.token_list[self.current].kind == self.kind_map[kind]:
-            # sys.stdout.write(str(self.token_list[self.current]) + "\n")
             self.observer.print_token(self.token_list[self.current])
             self.current += 1
             ### for returning identifier names
