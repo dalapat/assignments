@@ -10,14 +10,15 @@ class Scope:
         self.symbol_table[name] = _type
 
     def find(self, name):
-        curr_pointer = -1
+        curr_pointer = self #should this be self?
         returned_type = None
-        while(curr_pointer is not None):
-            if self.local(name):
-                returned_type = self.symbol_table[name]
+        while(curr_pointer is not None): # won't find integer in outer scope
+            # also getting stuck in infinite loop b/c currpointer never = none
+            if curr_pointer.local(name):
+                returned_type = curr_pointer.symbol_table[name]
                 break
             else:
-                curr_pointer = self.outer_scope
+                curr_pointer = curr_pointer.outer_scope
         return returned_type
 
     def local(self, name):

@@ -10,6 +10,8 @@ from Array import Array
 from Record import Record
 from Variable import Variable
 from Type import Type
+
+from Visitor import Visitor
 import sys
 
 
@@ -23,7 +25,7 @@ class Parser:
 
     # initializes Parser instance and parses a list of tokens
     # cmd line arguments determine output type
-    def __init__(self, observer = Observer(), token_list=[]):
+    def __init__(self, observer = Observer(), token_list=[], print_symbol_table = 0):
         self.current = 0 # current position in token list
         self.token_list = token_list # token list received from scanner
         self.kind_map = Token.kind_map # dictionary of token kinds
@@ -34,6 +36,7 @@ class Parser:
         self.universe.insert("INTEGER", Integer())
         self.program_scope = Scope(self.universe)
         self.current_scope = self.program_scope
+        self.print_symbol_table = print_symbol_table
 
     # parse the token list
     def parse(self):
@@ -83,7 +86,9 @@ class Parser:
             self.total_error_flag = 1
             sys.stderr.write("error: trash detected after program end: "
                              "Token \'{0}\'".format(self.token_list[self.current]) + '\n')
-
+        if self.print_symbol_table == 1:
+            visitor = Visitor()
+            visitor.visitScope(self.program_scope)
 
     # set expectation of creating a declaration
     # by following the declaration production
@@ -180,11 +185,13 @@ class Parser:
             if return_type is None:
                 sys.stderr.write("error: indentifier not found. attempting to assign "
                                  "uncreated type")
+                self.observer.end_type()
                 return None
             # how to enforce this is a type?
             # can I just throw an error if its a const or variable?
             if isinstance(return_type, Type):
                 self.current_scope.insert(name, return_type)
+            self.observer.end_type()
             return return_type
         elif self.token_list[self.current].kind == self.kind_map["ARRAY"]:
             self.match("ARRAY")
@@ -202,6 +209,7 @@ class Parser:
                 sys.stderr.write("error: array type not found")
                 return None
             return_type = Array(length, array_type)
+            self.observer.end_type()
             return return_type
         elif self.token_list[self.current].kind == self.kind_map["RECORD"]:
             self.match("RECORD")
@@ -226,11 +234,13 @@ class Parser:
             outer_scope = self.current_scope.outer_scope
             self.current_scope.outer_scope = None
             self.current_scope = outer_scope
+            self.observer.end_type()
             return return_type
         else:
             self.total_error_flag = 1
             sys.stderr.out("error: expecting Identifier, ARRAY, or RECORD")
         self.observer.end_type()
+        # do i need to modify the observer stuff for this assignment?
 
     # set expectation of creating a Expression
     # by following the Expression production
@@ -448,8 +458,9 @@ class Parser:
     # by following the IdentifierList production
     def _identifier_list(self):
         self.observer.begin_identifier_list()
-        self.match("IDENTIFIER")
+        name = self.match("IDENTIFIER")
         id_list = []
+        id_list.append(name)
         while self.token_list[self.current].kind == self.kind_map[","]:
             self.match(",")
             name = self.match("IDENTIFIER")
@@ -466,3 +477,12 @@ class Parser:
             self.match(",")
             self._expression()
         self.observer.end_expression_list()
+
+'''def main():
+    input_string = "PROGRAM X; VAR i: INTEGER; END X."
+    s = Scanner(input_string)
+    token_list = s.all()
+    p = Parser(token_list=token_list, print_symbol_table=0)
+    p.parse()
+
+main()'''
