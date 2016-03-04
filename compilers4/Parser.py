@@ -86,6 +86,7 @@ class Parser:
         self.match(".")
         self.observer.end_program()
         if not name == end_name:
+            self.total_error_flag = 1
             sys.stderr.write("error: program identifier does not match end identifier\n")
         # should an error go here to detect trash?
         if not self.token_list[self.current].kind == self.kind_map["EOF"]:
@@ -123,6 +124,7 @@ class Parser:
             name = self.match("IDENTIFIER")
             # check if const name in local scope
             if self.program_scope.local(name):
+                self.total_error_flag = 1
                 sys.stderr.write("error: attempted to redefine identifier\n")
             self.match("=")
             e = self._expression()
@@ -131,6 +133,7 @@ class Parser:
             if isinstance(e, Constant): # is it constant object or constant name
                 self.program_scope.insert(name, e)
             else:
+                self.total_error_flag = 1
                 sys.stderr.write("error: attempted to define const with nonconst object\n")
         self.observer.end_constdecl()
 
@@ -146,11 +149,13 @@ class Parser:
             return_type = self._type()
             self.match(";")
             if return_type is None:
-                sys.stderr.write("error: type not found")
+                self.total_error_flag = 1
+                sys.stderr.write("error: type not found\n")
                 return None
             if not self.current_scope.local(name):
                 self.current_scope.insert(name, return_type)
             else:
+                self.total_error_flag = 1
                 sys.stderr.write("error: attempting to redefine variable\n")
         self.observer.end_typedecl()
 
@@ -167,15 +172,23 @@ class Parser:
             self.match(":")
             return_type = self._type()
             if return_type is None:
+                self.total_error_flag = 1
                 sys.stderr.write("error: type not found\n")
                 return None
             self.match(";")
+            for name in id_list:
+                if not self.current_scope.local(name):
+                    self.current_scope.insert(name, Variable(return_type))
+                else:
+                    self.total_error_flag = 1
+                    sys.stderr.write("error: attempting to redefine var\n")
         self.observer.end_vardecl()
-        for name in id_list:
+        '''for name in id_list:
             if not self.current_scope.local(name):
                 self.current_scope.insert(name, Variable(return_type))
             else:
-                sys.stderr.write("error: attempting to redefine var\n")
+                self.total_error_flag = 1
+                sys.stderr.write("error: attempting to redefine var\n")'''
 
     # set expectation of creating a Type
     # by following the Type production
@@ -189,6 +202,7 @@ class Parser:
             return_type = self.current_scope.find(name)
             # return_type = self.current_scope.local(name)
             if return_type is None:
+                self.total_error_flag = 1
                 sys.stderr.write("error: indentifier not found. attempting to assign "
                                  "uncreated type\n")
                 self.observer.end_type()
@@ -200,7 +214,8 @@ class Parser:
                 self.observer.end_type()
                 return return_type
             else:
-                sys.stderr.write("error: found not Type object")
+                self.total_error_flag = 1
+                sys.stderr.write("error: found not Type object\n")
                 return None
         elif self.token_list[self.current].kind == self.kind_map["ARRAY"]:
             self.match("ARRAY")
@@ -210,12 +225,14 @@ class Parser:
             if isinstance(e, Constant):
                 length = e # should this be constant object or actual value?
             else:
+                self.total_error_flag = 1
                 sys.stderr.write("error: not a valid type for array length\n")
             self.match("OF")
             array_type = self._type()
             # check if array_type is already defined
             # if self.current_scope.find(array_type) is None:
             if array_type is None:
+                self.total_error_flag = 1
                 sys.stderr.write("error: array type not found\n")
                 return None
             return_type = Array(length, array_type)
@@ -232,12 +249,14 @@ class Parser:
                 record_field_type = self._type()
                 # check = self.current_scope.find(record_field_type)
                 if record_field_type is None:
+                    self.total_error_flag = 1
                     sys.stderr.write("error: record field type nonexistent\n")
                 self.match(";")
                 for name in id_list:
                     if not self.current_scope.local(name):
-                        self.current_scope.insert(name, record_field_type)
+                        self.current_scope.insert(name, Variable(record_field_type))
                     else:
+                        self.total_error_flag = 1
                         sys.stderr.write("error: attempting to redefine field\n")
                         return None
             self.match("END")
@@ -490,15 +509,14 @@ class Parser:
             self._expression()
         self.observer.end_expression_list()
 
-'''def main():
-    input_string = "PROGRAM As3;\n\
-CONST x = -47;\n\
-TYPE T = RECORD f: INTEGER; END;\n\
-VAR a: ARRAY 12 OF T;\n\
-BEGIN\n\
-  a[7].f := -x\n\
-END As3."
+'''
+def main():
+    f = open("test2.txt")
+    input_string = ""
+    for line in f:
+        input_string += line
     # print input_string
+    f.close()
     s = Scanner(input_string)
     token_list = s.all()
     p = Parser(token_list=token_list, print_symbol_table=1)
