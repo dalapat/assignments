@@ -33,7 +33,9 @@ class Parser:
         self.total_error_flag = 0 # detects if an error occurs anywhere in the program
         ###
         self.universe = Scope(None)
+        # self.integer_object = Integer()
         self.universe.insert("INTEGER", Integer())
+        # self.universe.insert(self.integer_object, self.integer_object)
         self.program_scope = Scope(self.universe)
         self.current_scope = self.program_scope
         self.print_symbol_table = print_symbol_table
@@ -43,7 +45,11 @@ class Parser:
         self._program()
         # do not print any output if error occurs
         if self.total_error_flag == 0:
-            self.observer.print_output()
+            if self.print_symbol_table == 0:
+                self.observer.print_output()
+            elif self.print_symbol_table == 1:
+                visitor = Visitor()
+                visitor.visitScope(self.program_scope)
 
     # check if the currently parsed token is a token we are
     # expecting to find
@@ -80,15 +86,15 @@ class Parser:
         self.match(".")
         self.observer.end_program()
         if not name == end_name:
-            sys.stderr.write("error: program identifier does not match end identifier")
+            sys.stderr.write("error: program identifier does not match end identifier\n")
         # should an error go here to detect trash?
         if not self.token_list[self.current].kind == self.kind_map["EOF"]:
             self.total_error_flag = 1
-            sys.stderr.write("error: trash detected after program end: "
+            sys.stderr.write("error: trash detected after program end:\n"
                              "Token \'{0}\'".format(self.token_list[self.current]) + '\n')
-        if self.print_symbol_table == 1:
+        '''if self.print_symbol_table == 1:
             visitor = Visitor()
-            visitor.visitScope(self.program_scope)
+            visitor.visitScope(self.program_scope)'''
 
     # set expectation of creating a declaration
     # by following the declaration production
@@ -117,7 +123,7 @@ class Parser:
             name = self.match("IDENTIFIER")
             # check if const name in local scope
             if self.program_scope.local(name):
-                sys.stderr.write("error: attempted to redefine identifier")
+                sys.stderr.write("error: attempted to redefine identifier\n")
             self.match("=")
             e = self._expression()
             self.match(";")
@@ -125,7 +131,7 @@ class Parser:
             if isinstance(e, Constant): # is it constant object or constant name
                 self.program_scope.insert(name, e)
             else:
-                sys.stderr.write("error: attempted to define const with nonconst object")
+                sys.stderr.write("error: attempted to define const with nonconst object\n")
         self.observer.end_constdecl()
 
     # set expectation of creating a TypeDecl
@@ -145,7 +151,7 @@ class Parser:
             if not self.current_scope.local(name):
                 self.current_scope.insert(name, return_type)
             else:
-                sys.stderr.write("error: attempting to redefine variable")
+                sys.stderr.write("error: attempting to redefine variable\n")
         self.observer.end_typedecl()
 
     # set expectation of creating a VarDecl
@@ -161,7 +167,7 @@ class Parser:
             self.match(":")
             return_type = self._type()
             if return_type is None:
-                sys.stderr.write("error: type not found")
+                sys.stderr.write("error: type not found\n")
                 return None
             self.match(";")
         self.observer.end_vardecl()
@@ -169,7 +175,7 @@ class Parser:
             if not self.current_scope.local(name):
                 self.current_scope.insert(name, Variable(return_type))
             else:
-                sys.stderr.write("error: attempting to redefine var")
+                sys.stderr.write("error: attempting to redefine var\n")
 
     # set expectation of creating a Type
     # by following the Type production
@@ -184,15 +190,18 @@ class Parser:
             # return_type = self.current_scope.local(name)
             if return_type is None:
                 sys.stderr.write("error: indentifier not found. attempting to assign "
-                                 "uncreated type")
+                                 "uncreated type\n")
                 self.observer.end_type()
                 return None
             # how to enforce this is a type?
             # can I just throw an error if its a const or variable?
             if isinstance(return_type, Type):
-                self.current_scope.insert(name, return_type)
-            self.observer.end_type()
-            return return_type
+                # self.current_scope.insert(name, return_type)
+                self.observer.end_type()
+                return return_type
+            else:
+                sys.stderr.write("error: found not Type object")
+                return None
         elif self.token_list[self.current].kind == self.kind_map["ARRAY"]:
             self.match("ARRAY")
             length = None
@@ -201,12 +210,13 @@ class Parser:
             if isinstance(e, Constant):
                 length = e # should this be constant object or actual value?
             else:
-                sys.stderr.write("error: not a valid type for array length")
+                sys.stderr.write("error: not a valid type for array length\n")
             self.match("OF")
             array_type = self._type()
             # check if array_type is already defined
-            if self.current_scope.find(array_type) is None:
-                sys.stderr.write("error: array type not found")
+            # if self.current_scope.find(array_type) is None:
+            if array_type is None:
+                sys.stderr.write("error: array type not found\n")
                 return None
             return_type = Array(length, array_type)
             self.observer.end_type()
@@ -220,14 +230,15 @@ class Parser:
                 id_list = self._identifier_list()
                 self.match(":")
                 record_field_type = self._type()
-                if self.current_scope.find(record_field_type) is None:
-                    sys.stderr.write("error: record field type nonexistent")
+                # check = self.current_scope.find(record_field_type)
+                if record_field_type is None:
+                    sys.stderr.write("error: record field type nonexistent\n")
                 self.match(";")
                 for name in id_list:
                     if not self.current_scope.local(name):
                         self.current_scope.insert(name, record_field_type)
                     else:
-                        sys.stderr.write("error: attempting to redefine field")
+                        sys.stderr.write("error: attempting to redefine field\n")
                         return None
             self.match("END")
             return_type = Record(self.current_scope)
@@ -238,7 +249,7 @@ class Parser:
             return return_type
         else:
             self.total_error_flag = 1
-            sys.stderr.out("error: expecting Identifier, ARRAY, or RECORD")
+            sys.stderr.out("error: expecting Identifier, ARRAY, or RECORD\n")
         self.observer.end_type()
         # do i need to modify the observer stuff for this assignment?
 
@@ -260,9 +271,10 @@ class Parser:
                 self.match("-")
             else:
                 self.total_error_flag = 1
-                sys.stderr.write("error: expecting \'+\' or \'-\'")
+                sys.stderr.write("error: expecting \'+\' or \'-\'\n")
             self._term()
         self.observer.end_expression()
+        # e = Constant(self.universe.find("INTEGER"), 5)
         e = Constant(self.universe.find("INTEGER"), 5)
         return e
 
@@ -282,7 +294,7 @@ class Parser:
                 self.match("MOD")
             else:
                 self.total_error_flag = 1
-                sys.stderr.out("error: expecting \'*\', \'DIV\', or \'MOD\'")
+                sys.stderr.out("error: expecting \'*\', \'DIV\', or \'MOD\'\n")
             self._factor()
         self.observer.end_term()
 
@@ -300,7 +312,7 @@ class Parser:
             self.match(")")
         else:
             self.total_error_flag = 1
-            sys.stdout.error("error: expecting integer, identifier or \'(\'")
+            sys.stdout.error("error: expecting integer, identifier or \'(\'\n")
         self.observer.end_factor()
 
     # set expectation of creating a Instructions
@@ -333,7 +345,7 @@ class Parser:
             self._write()
         else:
             self.total_error_flag = 1
-            sys.stderr.write("error: not a valid instruction "
+            sys.stderr.write("error: not a valid instruction\n"
                              "@({0}, {1})".format(self.token_list[self.current].start_position,
                                                   self.token_list[self.current].end_position))
         self.observer.end_instruction()
@@ -404,7 +416,7 @@ class Parser:
             self.match(">=")
         else:
             self.total_error_flag = 1
-            sys.stderr.write("error: not a valid condition "
+            sys.stderr.write("error: not a valid condition\n"
                              "@({0}, {1})".format(self.token_list[self.current].start_position,
                                                   self.token_list[self.current].end_position))
         self._expression()
@@ -449,7 +461,7 @@ class Parser:
                 self.match("IDENTIFIER")
             else:
                 self.total_error_flag = 1
-                sys.stderr.write("error: not a valid selector "
+                sys.stderr.write("error: not a valid selector\n"
                              "@({0}, {1})".format(self.token_list[self.current].start_position,
                                                   self.token_list[self.current].end_position))
         self.observer.end_selector()
@@ -478,11 +490,19 @@ class Parser:
             self._expression()
         self.observer.end_expression_list()
 
-'''def main():
-    input_string = "PROGRAM X; VAR i: INTEGER; END X."
+def main():
+    input_string = "PROGRAM As3;\n\
+CONST x = -47;\n\
+TYPE T = RECORD f: INTEGER; END;\n\
+VAR a: ARRAY 12 OF T;\n\
+BEGIN\n\
+  a[7].f := -x\n\
+END As3."
+    # print input_string
     s = Scanner(input_string)
     token_list = s.all()
-    p = Parser(token_list=token_list, print_symbol_table=0)
+    p = Parser(token_list=token_list, print_symbol_table=1)
     p.parse()
 
-main()'''
+main()
+

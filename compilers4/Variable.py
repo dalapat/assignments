@@ -6,4 +6,4 @@ class Variable(Entry):
         self._type = _type
 
     def visit(self, visitor):
-        visitor.visit(self)
+        visitor.visitVar(self)
