@@ -490,7 +490,7 @@ class Parser:
             self._expression()
         self.observer.end_expression_list()
 
-def main():
+'''def main():
     input_string = "PROGRAM As3;\n\
 CONST x = -47;\n\
 TYPE T = RECORD f: INTEGER; END;\n\
@@ -505,4 +505,4 @@ END As3."
     p.parse()
 
 main()
-
+'''

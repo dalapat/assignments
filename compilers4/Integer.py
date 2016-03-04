@@ -6,5 +6,5 @@ class Integer(Type):
         pass
 
     def visit(self, visitor):
-        visitor.visitInt(self)
+        visitor.visitInt()
 

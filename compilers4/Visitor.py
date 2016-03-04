@@ -9,9 +9,10 @@ class Visitor:
     def visitScope(self, scope):
         self.write("SCOPE BEGIN\n")
         # self.indent += 2
-        for i in sorted(scope):
-            sys.stdout.write(self.indent + i + " =>" + '\n')
-            scope[i].visit(self)
+        for i in sorted(scope.symbol_table):
+            self.write(i + " =>" + '\n')
+            #sys.stdout.write(str(self.indent) + i + " =>" + '\n')
+            scope.symbol_table[i].visit(self)
         # self.indent -= 2
         self.write("END SCOPE\n")
 
@@ -21,11 +22,11 @@ class Visitor:
             pad_string += " "
         sys.stdout.write(pad_string + string)
 
-    def visitRecord(self, record_scope):
+    def visitRecord(self, record):
         self.indent += 2
         self.write("RECORD BEGIN\n")
         # visit scope
-        self.visitScope(record_scope)
+        self.visitScope(record.scope)
         self.write("END RECORD\n")
         self.indent -= 2
 
@@ -65,4 +66,9 @@ class Visitor:
         self.indent -= 2
         self.indent -= 2
         self.write("END CONST'\n")
+        self.indent -= 2
+
+    def visitInt(self):
+        self.indent += 2
+        self.write("INTEGER\n")
         self.indent -= 2
