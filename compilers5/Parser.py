@@ -5,12 +5,17 @@ from Observer import Observer
 ###
 from Scope import Scope
 from Constant import Constant
-from Integer import Integer
+from Integer import Integer, integerInstance
 from Array import Array
 from Record import Record
 from Variable import Variable
 from Type import Type
 from ConditionNode import ConditionNode
+from VariableNode import VariableNode
+from IndexNode import IndexNode
+from NumberNode import NumberNode
+from BinaryNode import BinaryNode
+from FieldNode import FieldNode
 
 from Visitor import Visitor
 import sys
@@ -33,7 +38,7 @@ class Parser:
         self.observer = observer # output class determined by cmd line arguments
         self.total_error_flag = 0 # detects if an error occurs anywhere in the program
         self.universe = Scope(None) # universe scope
-        self.universe.insert("INTEGER", Integer()) # universe scope only holds integer
+        self.universe.insert("INTEGER", integerInstance) # universe scope only holds integer
         self.program_scope = Scope(self.universe) # program scope to hold program names
         self.current_scope = self.program_scope # current scope for switching between scopes
         self.print_symbol_table = print_symbol_table # determines whether to print cst or st
@@ -283,38 +288,54 @@ class Parser:
     # by following the Term production
     def _term(self):
         self.observer.begin_term()
-        self._factor()
+        operation = None
+        subtree_left = self._factor()
+        node = subtree_left
         while (self.token_list[self.current].kind == self.kind_map["*"])or \
             (self.token_list[self.current].kind == self.kind_map["DIV"]) or \
             (self.token_list[self.current].kind == self.kind_map["MOD"]):
             if self.token_list[self.current].kind == self.kind_map["*"]:
-                self.match("*")
+                 operation = self.match("*")
             elif self.token_list[self.current].kind == self.kind_map["DIV"]:
-                self.match("DIV")
+                 operation = self.match("DIV")
             elif self.token_list[self.current].kind == self.kind_map["MOD"]:
-                self.match("MOD")
+                 operation = self.match("MOD")
             else:
                 self.total_error_flag = 1
                 sys.stderr.out("error: expecting \'*\', \'DIV\', or \'MOD\'\n")
-            self._factor()
+            subtree_right =  self._factor()
+            temp = BinaryNode(operation, subtree_left, subtree_right)
+        #return singular factor or binary node
         self.observer.end_term()
 
     # set expectation of creating a Factor
     # by following the Factor production
     def _factor(self):
         self.observer.begin_factor()
+        node = None
         if self.token_list[self.current].kind == self.kind_map["INTEGER"]:
-            self.match("INTEGER")
+            int_value = self.match("INTEGER")
+            c = Constant(integerInstance, int_value)
+            # make a constant object out of the int value ACTUAL VALUE
+            # num = NumberNode(c)
+            node = NumberNode(c)
+            # make a number node of out of the constant
+            # return number node
         elif self.token_list[self.current].kind == self.kind_map["IDENTIFIER"]:
-            self._designator()
+            sub_tree = self._designator()
+            node = sub_tree
+            #if not (isinstance(node, VariableNode) or isinstance(node, NumberNode)):
+            #    sys.stderr.write("error: designator in factor")
         elif self.token_list[self.current].kind == self.kind_map["("]:
             self.match("(")
-            self._expression()
+            sub_tree = self._expression()
             self.match(")")
+            node = sub_tree
         else:
             self.total_error_flag = 1
             sys.stdout.error("error: expecting integer, identifier or \'(\'\n")
         self.observer.end_factor()
+        return node
 
     # set expectation of creating a Instructions
     # by following the Instructions production
@@ -451,29 +472,70 @@ class Parser:
     # by following the Designator production
     def _designator(self):
         self.observer.begin_designator()
-        self.match("IDENTIFIER")
-        self._selector()
+        var_name = self.match("IDENTIFIER")
+        var_obj = self.program_scope.find(var_name)
+        # check var is actually variable object
+        if not isinstance(var_obj, Variable):
+            sys.stderr.write("error: variable name not pointing var")
+            # exit(1)
+        # is the current type of the AST node at this point just the
+        # variable's type?
+        var_type = var_obj._type
+        var_node = VariableNode(var_type, var_obj, var_name)
+        subtree = self._selector(var_node)
         self.observer.end_designator()
+        return subtree
 
     # set expectation of creating a Selector
     # by following the Selector production
-    def _selector(self):
+    def _selector(self, variable_node):
         self.observer.begin_selector()
+        return_object = variable_node
         while (self.token_list[self.current].kind == self.kind_map["["]) \
                 or (self.token_list[self.current].kind == self.kind_map["."]):
             if self.token_list[self.current].kind == self.kind_map["["]:
                 self.match("[")
-                self._expression_list()
+                exp_list = self._expression_list()
                 self.match("]")
+                # check if it's an array
+                if not isinstance(return_object.variable._type, Array):
+                    sys.stderr.write("error: not an array")
+                # what happens if expression is x+1 or something?
+                node = return_object
+                # making assumption that exp list just contains accessible numbers
+                # need to check this
+                for e in exp_list:
+                    if not isinstance(e, Constant):
+                        sys.stderr.write("error: nonconstant found in selector")
+                # type refers to the type of the variable node
+                # what should the type be here??
+                index_type = return_object.type
+                index_node = IndexNode(index_type, node, exp_list[0])
+                for i in range(1, len(exp_list)):
+                    node = index_node
+                    index_type = node.type
+                    index_node = IndexNode(index_type, node, exp_list[i])
+                return_object = index_node
             elif self.token_list[self.current].kind == self.kind_map["."]:
+                # how to make field
                 self.match(".")
-                self.match("IDENTIFIER")
+                field_var_name = self.match("IDENTIFIER")
+                if not isinstance(return_object.type, Record):
+                    sys.stderr.write("error: attempting to select field from non-record type")
+                # get the type of the field in the record
+                # do i want to search in the local scope of the record or every scope
+                field_var_obj = return_object.variable._type.local(field_var_name)
+                field_type = field_var_obj._type
+                field_right_var_obj = VariableNode(field_type, field_var_obj, field_var_name)
+                node = FieldNode(field_type, return_object, field_right_var_obj)
+                return_object = node
             else:
                 self.total_error_flag = 1
                 sys.stderr.write("error: not a valid selector\n"
                              "@({0}, {1})".format(self.token_list[self.current].start_position,
                                                   self.token_list[self.current].end_position))
         self.observer.end_selector()
+        return return_object
 
     # set expectation of creating a IdentifierList
     # by following the IdentifierList production
@@ -492,12 +554,17 @@ class Parser:
     # set expectation of creating a ExpressionList
     # by following the ExpressionList production
     def _expression_list(self):
+        # return list of expressions - added return in assignment 5
         self.observer.begin_expression_list()
-        self._expression()
+        exp_list = []
+        name = self._expression()
+        exp_list.append(name)
         while self.token_list[self.current].kind == self.kind_map[","]:
             self.match(",")
-            self._expression()
+            name = self._expression()
+            exp_list.append(name)
         self.observer.end_expression_list()
+        return exp_list
 
 '''
 def main():

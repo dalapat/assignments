@@ -11,3 +11,4 @@ class Integer(Type):
     def visit(self, visitor):
         visitor.visitInt()
 
+integerInstance = Integer()

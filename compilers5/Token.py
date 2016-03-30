@@ -73,7 +73,7 @@ class Token():
         output_string = ""
         if self.kind == 0:
             # integer
-            output_string = str(self.int_value)
+            output_string = self.int_value
         elif self.kind == 1:
             # identifier
             output_string = self.identifier_value
