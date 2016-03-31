@@ -11,3 +11,6 @@ class RepeatNode(InstructionNode):
     def to_string(self):
         output = "condition: {0}\ninstructions: {1}\n".format(self.condition, self.instructions)
         sys.stdout.write(output+'\n')
+
+    def visit(self, visitor):
+        visitor.visitRepeatNode(self)

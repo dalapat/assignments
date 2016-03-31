@@ -19,3 +19,6 @@ class BinaryNode(ExpressionNode):
                                                                self.exp_right.to_string())+'\n')
         # sys.stdout.write(output+'\n')
 
+    def visit(self, visitor):
+        visitor.visitBinaryNode(self)
+

@@ -10,3 +10,6 @@ class IndexNode(ExpressionNode):
 
     def to_string(self):
         pass
+
+    def visit(self, visitor):
+        visitor.visitIndexNode(self)

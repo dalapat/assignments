@@ -10,3 +10,6 @@ class ReadNode(InstructionNode):
     def to_string(self):
         output = "location: {0}\n".format(self.location)
         sys.stdout.write(output+'\n')
+
+    def visit(self, visitor):
+        visitor.visitReadNode(self)

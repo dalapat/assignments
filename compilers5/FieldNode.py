@@ -9,3 +9,6 @@ class FieldNode(ExpressionNode):
 
     def to_string(self):
         pass
+
+    def visit(self, visitor):
+        visitor.visitFieldNode(self)

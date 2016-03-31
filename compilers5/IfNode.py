@@ -15,3 +15,6 @@ class IfNode(InstructionNode):
                                                  self.instructions_true,
                                                  self.instructions_false)
         sys.stdout.write(output+'\n')
+
+    def visit(self, visitor):
+        visitor.visitIfNode(self)

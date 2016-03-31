@@ -13,3 +13,6 @@ class ConditionNode(Node):
                                                                self.exp_right,
                                                                self.relation)
         sys.stdout.write(output+'\n')
+
+    def visit(self, visitor):
+        visitor.visitConditionNode(self)
