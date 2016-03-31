@@ -17,6 +17,9 @@ class Visitor:
         self.indent -= 2
         self.write("END SCOPE\n")
 
+    def setIndent(self, indent):
+        self.indent = indent
+
     # necessary empty function due to design flaw
     # between Visitor and DotVisitor
     def end(self):

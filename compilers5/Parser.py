@@ -62,6 +62,7 @@ class Parser:
                 self.visitor.end()
             elif self.print_symbol_table == 2:
                 currinstruction = instructions
+                self.visitor.start()
                 while(currinstruction is not None):
                     currinstruction.visit(self.visitor)
                     currinstruction = currinstruction._next
@@ -780,9 +781,9 @@ class Parser:
         self.observer.end_expression_list()
         return exp_list
 
-
+'''
 def main():
-    f = open("test5.txt")
+    f = open("../compilers4/test2.txt")
     input_string = ""
     for line in f:
         input_string += line
@@ -794,3 +795,4 @@ def main():
     p.parse()
 
 main()
+'''

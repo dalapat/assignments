@@ -64,13 +64,14 @@ class ASTvisitor:
         if_node.condition.visit(self)
         self.write("true =>")
         if_node.instructions_true.visit(self)
-        self.write("false =>")
-        if_node.instructions_false.visit(self)
+        if if_node.instructions_false is not None:
+            self.write("false =>")
+            if_node.instructions_false.visit(self)
         self.indent -= 2
 
     def visitBinaryNode(self, binary_node):
         self.indent += 2
-        self.write("Binary ({0})".format(binary_node.operator))
+        self.write("Binary ({0}):".format(binary_node.operator))
         self.write("left =>")
         binary_node.exp_left.visit(self)
         self.write("right =>")
@@ -81,6 +82,7 @@ class ASTvisitor:
         self.indent += 2
         self.write("Number:")
         self.write("value =>")
+        self.stvisitor.setIndent(self.indent)
         number_node.constant.visit(self.stvisitor)
         self.indent -= 2
 
@@ -88,6 +90,7 @@ class ASTvisitor:
         self.indent += 2
         self.write("Variable:")
         self.write("variable =>")
+        self.stvisitor.setIndent(self.indent)
         variable_node.variable.visit(self.stvisitor)
         self.indent -= 2
 
@@ -108,4 +111,7 @@ class ASTvisitor:
         self.write("variable =>")
         field_node.variable.visit(self)
         self.indent -= 2
+
+    def start(self):
+        self.write("instructions =>")
 
