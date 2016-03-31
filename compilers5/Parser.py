@@ -222,7 +222,8 @@ class Parser:
             length = None
             e = self._expression()
             # get length of array
-            if isinstance(e, Constant):
+            # print "TYPE",
+            if isinstance(e, NumberNode):
                 length = e
             else:
                 self.total_error_flag = 1
@@ -336,9 +337,34 @@ class Parser:
         else:
             node = subtree
         if outer_operation == "-":
-            bn = BinaryNode(outer_operation,
-                            NumberNode(Constant(integerInstance, 0)), node)
-            node = bn
+            # how to do negative numbers?
+            if isinstance(node, BinaryNode):
+                if isinstance(node.exp_left, NumberNode) and isinstance(node.exp_right, NumberNode):
+                    op = node.operator
+                    left_value = node.exp_left.value
+                    right_value = node.exp_right.value
+                    op_result = 0
+                    if op == "+":
+                        op_result = left_value + right_value
+                    elif op == "-":
+                        op_result = left_value - right_value
+                    elif op == "*":
+                        op_result = left_value * right_value
+                    elif op == "DIV":
+                        op_result = left_value / right_value
+                    elif op == "MOD":
+                        op_result = left_value % right_value
+                    else:
+                        sys.stderr.write("error: invalid op")
+                    result = -1*op_result
+                    c = Constant(integerInstance, result)
+                    num_node = NumberNode(c)
+                    node = num_node
+            elif isinstance(node, NumberNode):
+                node.constant.value = -1*node.constant.value
+            # bn = BinaryNode(outer_operation,
+                            #NumberNode(Constant(integerInstance, 0)), node)
+            # node = bn
         return node
 
     # set expectation of creating a Term
@@ -433,35 +459,41 @@ class Parser:
     # by following the Instructions production
     def _instructions(self):
         self.observer.begin_instructions()
-        self._instruction()
+        head = self._instruction()
+        curr = head
         while self.token_list[self.current].kind == self.kind_map[";"]:
             self.match(";")
-            self._instruction()
+            temp = self._instruction()
+            curr._next = temp
+            curr = temp
         self.observer.end_instructions()
+        return curr
 
     # set expectation of creating a Instruction
     # by following the Instruction production
     def _instruction(self):
         # print "Instruction"
         self.observer.begin_instruction()
+        node = None
         if self.token_list[self.current].kind == self.kind_map["IDENTIFIER"]:
-            self._assign()
+            node = self._assign()
         elif self.token_list[self.current].kind == self.kind_map["IF"]:
-            self._if()
+            node = self._if()
         elif self.token_list[self.current].kind == self.kind_map["REPEAT"]:
-            self._repeat()
+            node = self._repeat()
         elif self.token_list[self.current].kind == self.kind_map["WHILE"]:
-            self._while()
+            node = self._while()
         elif self.token_list[self.current].kind == self.kind_map["READ"]:
-            self._read()
+            node = self._read()
         elif self.token_list[self.current].kind == self.kind_map["WRITE"]:
-            self._write()
+            node = self._write()
         else:
             self.total_error_flag = 1
             sys.stderr.write("error: not a valid instruction\n"
                              "@({0}, {1})".format(self.token_list[self.current].start_position,
                                                   self.token_list[self.current].end_position))
         self.observer.end_instruction()
+        return node
 
     # set expectation of creating a Assign
     # by following the Assign production
@@ -469,7 +501,9 @@ class Parser:
         # print "Assign"
         self.observer.begin_assign()
         subtree_left = self._designator()
+        # how do we check if its a variable?
         if not isinstance(subtree_left, VariableNode):
+            print type(subtree_left.type)
             sys.stderr.write("error: assign")
         stl_type = subtree_left.type
         self.match(":=")
@@ -620,7 +654,19 @@ class Parser:
             num_node = NumberNode(var_obj)
             self.observer.end_designator()
             return num_node
-        var_type = var_obj._type
+        if isinstance(var_obj._type, Integer):
+            var_type = var_obj._type
+        elif isinstance(var_obj._type, Array):
+            var_type = var_obj._type._type
+        elif isinstance(var_obj._type, Record):
+            var_type = var_obj._type
+        else:
+            sys.stderr.write("error: oh shit")
+        # var_type = var_obj._type
+        # what type should go here? should i distinguish by possible types?
+        # var_type = var_obj._type._type
+        #print "vt", type(var_type)
+        #print "vo", type(var_obj)
         var_node = VariableNode(var_type, var_obj, var_name)
         subtree = self._selector(var_node)
         self.observer.end_designator()
@@ -645,11 +691,13 @@ class Parser:
                 # making assumption that exp list just contains accessible numbers
                 # need to check this
                 for e in exp_list:
-                    if not isinstance(e, Constant):
+                    if not isinstance(e, NumberNode):
                         sys.stderr.write("error: nonconstant found in selector")
                 # type refers to the type of the variable node
                 # what should the type be here??
                 index_type = return_object.type
+                # print "it", type(index_type)
+                # print "index type: ", type(index_type)
                 index_node = IndexNode(index_type, node, exp_list[0])
                 for i in range(1, len(exp_list)):
                     node = index_node
@@ -660,11 +708,22 @@ class Parser:
                 # how to make field
                 self.match(".")
                 field_var_name = self.match("IDENTIFIER")
+                # throws an error on field_var because it gets an index node
+                # and can't find variable attribute
                 if not isinstance(return_object.type, Record):
-                    sys.stderr.write("error: attempting to select field from non-record type")
-                # get the type of the field in the record
-                # do i want to search in the local scope of the record or every scope
-                field_var_obj = return_object.variable._type.local(field_var_name)
+                    # sys.stdout.write("TYPE1: " + str(type(return_object)) + "\n")
+                    # sys.stdout.write("return_object.type: " + str(type(return_object.type)) + "\n")
+                    sys.stderr.write("error: attempting to select field from non-record type\n")
+                if isinstance(return_object, VariableNode):
+                    if(return_object.variable.type.scope.local(field_var_name)):
+                        # local doesn't return, should it?
+                        field_var_obj = return_object.variable.type.scope.find(field_var_name)
+                elif isinstance(return_object, IndexNode) or isinstance(return_object, FieldNode):
+                    if(return_object.location.type.scope.local(field_var_name)):
+                        field_var_obj = return_object.location.type.scope.find(field_var_name)
+                else:
+                    sys.stderr.write("error: selector\n")
+                # field_var_obj = return_object.variable._type.local(field_var_name)
                 field_type = field_var_obj._type
                 field_right_var_obj = VariableNode(field_type, field_var_obj, field_var_name)
                 node = FieldNode(field_type, return_object, field_right_var_obj)
@@ -708,7 +767,7 @@ class Parser:
 
 
 def main():
-    f = open("../compilers4/test2.txt")
+    f = open("../compilers4/test.txt")
     input_string = ""
     for line in f:
         input_string += line
