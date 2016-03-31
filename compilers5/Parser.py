@@ -292,7 +292,7 @@ class Parser:
                 sys.stderr.write("error: expecting \'+\' or \'-\'\n")
             self._term()'''
         node = self.nexpression()
-        node.to_string()
+        # node.to_string()
         self.observer.end_expression()
         # e = Constant(self.universe.find("INTEGER"), 5)
         # print "e", type(node)
@@ -319,7 +319,7 @@ class Parser:
                 self.total_error_flag = 1
                 sys.stderr.write("error: expecting \'+\' or \'-\'\n")
             subtree_right = self._term()
-            if isinstance(subtree.type, Constant) and isinstance(subtree_right.type, Constant):
+            if isinstance(subtree, NumberNode) and isinstance(subtree_right, NumberNode):
                 result = 0
                 if inner_operation == "+":
                     result = int(subtree.type.value) + int(subtree_right.type.value)
@@ -384,14 +384,15 @@ class Parser:
                 self.total_error_flag = 1
                 sys.stderr.out("error: expecting \'*\', \'DIV\', or \'MOD\'\n")
             sub_right = self.nterm()
-            if isinstance(sub_left.type, Constant) and isinstance(sub_right.type, Constant):
+            # originally had constant, changed it to integer
+            if isinstance(sub_left, NumberNode) and isinstance(sub_right, NumberNode):
                 result = 0
                 if operation == "*":
-                    result = int(sub_left.type.value) * int(sub_right.type.value)
+                    result = int(sub_left.constant.value) * int(sub_right.constant.value)
                 elif operation == "DIV":
-                    result = int(sub_left.type.value) / int(sub_right.type.value)
+                    result = int(sub_left.constant.value) / int(sub_right.constant.value)
                 elif operation == "MOD":
-                    result = int(sub_left.type.value) % int(sub_right.type.value)
+                    result = int(sub_left.constant.value) % int(sub_right.constant.value)
                 c = Constant(integerInstance, result)
                 num_node = NumberNode(c)
                 return num_node
@@ -408,9 +409,7 @@ class Parser:
         node = None
         if self.token_list[self.current].kind == self.kind_map["INTEGER"]:
             int_value = self.match("INTEGER")
-            c = Constant(integerInstance, int_value)
-            # make a constant object out of the int value ACTUAL VALUE
-            # num = NumberNode(c)
+            c = Constant(Constant, int_value)
             node = NumberNode(c)
             # make a number node of out of the constant
             # return number node
@@ -526,7 +525,7 @@ class Parser:
         self.observer.end_while()
         negation_condition_node = self.get_negation(condition)
         repeat_node = RepeatNode(None, negation_condition_node, instructions)
-        if_node = IfNode(None, condition, repeat_node)
+        if_node = IfNode(None, condition, repeat_node, None)
         return if_node
 
     def get_negation(self, condition_node):
@@ -611,11 +610,16 @@ class Parser:
         # check var is actually variable object
         # why can this be a constant? how does this affect lower functions?
         if not (isinstance(var_obj, Variable) or isinstance(var_obj, Constant)):
-            print "v", type(var_obj)
+            # print "v", type(var_obj)
             sys.stderr.write("error: variable name not pointing var or const\n")
             # exit(1)
         # is the current type of the AST node at this point just the
         # variable's type?
+        # if its a constant, can i just make a numbernode and return it?
+        if isinstance(var_obj, Constant):
+            num_node = NumberNode(var_obj)
+            self.observer.end_designator()
+            return num_node
         var_type = var_obj._type
         var_node = VariableNode(var_type, var_obj, var_name)
         subtree = self._selector(var_node)
