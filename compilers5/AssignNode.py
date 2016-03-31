@@ -12,3 +12,6 @@ class AssignNode(InstructionNode):
     def to_string(self):
         output = "location: {0}\nexpression: {1}\n".format(self.location, self.expression)
         sys.stdout.write(output+'\n')
+
+    def visit(self, visitor):
+        visitor.visitAssignNode(self)

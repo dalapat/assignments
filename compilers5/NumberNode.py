@@ -11,3 +11,6 @@ class NumberNode(ExpressionNode):
     def to_string(self):
         pass
 
+    def visit(self, visitor):
+        visitor.visitNumberNode(self)
+

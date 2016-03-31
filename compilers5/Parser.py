@@ -59,6 +59,8 @@ class Parser:
             elif self.print_symbol_table == 1:
                 self.visitor.visitScope(self.program_scope)
                 self.visitor.end()
+            elif self.print_symbol_table == 2:
+                pass
 
     # check if the currently parsed token is a token we are
     # expecting to find
@@ -86,9 +88,10 @@ class Parser:
         name = self.match("IDENTIFIER")
         self.match(";")
         self._declarations()
+        instructions = None
         if self.token_list[self.current].kind == self.kind_map["BEGIN"]:
             self.match("BEGIN")
-            self._instructions()
+            instructions = self._instructions()
         self.match("END")
         end_name = self.match("IDENTIFIER")
         self.match(".")
@@ -100,6 +103,7 @@ class Parser:
             self.total_error_flag = 1
             sys.stderr.write("error: trash detected after program end:\n"
                              "Token \'{0}\'".format(self.token_list[self.current]) + '\n')
+        return instructions
 
     # set expectation of creating a declaration
     # by following the declaration production
@@ -124,6 +128,7 @@ class Parser:
         # print "ConstDecl"
         self.observer.begin_constdecl()
         self.match("CONST")
+        # return_obj = None
         while self.token_list[self.current].kind == self.kind_map["IDENTIFIER"]:
             name = self.match("IDENTIFIER")
             # check if const name in local scope
@@ -137,6 +142,7 @@ class Parser:
                 sys.stderr.write("error: constdecl received nonconst exp\n")
                 # exit(1)
             self.match(";")
+            #return_obj = e
             # add it we formed a constant
             if isinstance(e.constant, Constant): # is it constant object or constant name
                 self.program_scope.insert(name, e.constant)
@@ -144,6 +150,7 @@ class Parser:
                 self.total_error_flag = 1
                 sys.stderr.write("error: attempted to define const with nonconst object\n")
         self.observer.end_constdecl()
+        # return return_obj
 
     # set expectation of creating a TypeDecl
     # by following the TypeDecl production
@@ -151,6 +158,7 @@ class Parser:
         # print "TypeDecl"
         self.observer.begin_typedecl()
         self.match("TYPE")
+        #return_type = None
         while self.token_list[self.current].kind == self.kind_map["IDENTIFIER"]:
             name = self.match("IDENTIFIER")
             self.match("=")
@@ -167,6 +175,7 @@ class Parser:
                 self.total_error_flag = 1
                 sys.stderr.write("error: attempting to redefine variable\n")
         self.observer.end_typedecl()
+        # return return_type
 
     # set expectation of creating a VarDecl
     # by following the VarDecl production
@@ -193,6 +202,7 @@ class Parser:
                     self.total_error_flag = 1
                     sys.stderr.write("error: attempting to redefine var\n")
         self.observer.end_vardecl()
+        return return_type
 
     # set expectation of creating a Type
     # by following the Type production
@@ -224,7 +234,8 @@ class Parser:
             # get length of array
             # print "TYPE",
             if isinstance(e, NumberNode):
-                length = e
+                # should it be assigned to actual value or number node?
+                length = e.constant.value
             else:
                 self.total_error_flag = 1
                 sys.stderr.write("error: not a valid type for array length\n")
@@ -361,7 +372,10 @@ class Parser:
                     num_node = NumberNode(c)
                     node = num_node
             elif isinstance(node, NumberNode):
-                node.constant.value = -1*node.constant.value
+                # node.constant.value = -1*node.constant.value
+                c = Constant(integerInstance, 0 - node.constant.value)
+                num_node = NumberNode(c)
+                node = num_node
             # bn = BinaryNode(outer_operation,
                             #NumberNode(Constant(integerInstance, 0)), node)
             # node = bn
@@ -435,7 +449,7 @@ class Parser:
         node = None
         if self.token_list[self.current].kind == self.kind_map["INTEGER"]:
             int_value = self.match("INTEGER")
-            c = Constant(Constant, int_value)
+            c = Constant(integerInstance, int_value)
             node = NumberNode(c)
             # make a number node of out of the constant
             # return number node
@@ -502,8 +516,10 @@ class Parser:
         self.observer.begin_assign()
         subtree_left = self._designator()
         # how do we check if its a variable?
-        if not isinstance(subtree_left, VariableNode):
-            print type(subtree_left.type)
+        # it could be a field
+        if not (isinstance(subtree_left, VariableNode) or isinstance(subtree_left, FieldNode)
+                or isinstance(subtree_left, IndexNode)):
+            print type(subtree_left)
             sys.stderr.write("error: assign")
         stl_type = subtree_left.type
         self.match(":=")
@@ -641,23 +657,16 @@ class Parser:
         self.observer.begin_designator()
         var_name = self.match("IDENTIFIER")
         var_obj = self.program_scope.find(var_name)
-        # check var is actually variable object
-        # why can this be a constant? how does this affect lower functions?
         if not (isinstance(var_obj, Variable) or isinstance(var_obj, Constant)):
             # print "v", type(var_obj)
             sys.stderr.write("error: variable name not pointing var or const\n")
             # exit(1)
-        # is the current type of the AST node at this point just the
-        # variable's type?
-        # if its a constant, can i just make a numbernode and return it?
         if isinstance(var_obj, Constant):
-            # what should I do if i get a constant here? if i just make a
-            # number node and return it, then selector won't be printed.
-            # but selector shouldn't be accessed anyway
             num_node = NumberNode(var_obj)
             # var_type = var_obj._type
+            subtree = self._selector(num_node)
             self.observer.end_designator()
-            return num_node
+            return subtree
         if isinstance(var_obj._type, Integer):
             var_type = var_obj._type
         elif isinstance(var_obj._type, Array):
@@ -665,11 +674,11 @@ class Parser:
         elif isinstance(var_obj._type, Record):
             var_type = var_obj._type
         else:
-            sys.stderr.write("error: oh shit\n")
+            sys.stderr.write("error: designator\n")
         # var_type = var_obj._type
         # what type should go here? should i distinguish by possible types?
         # var_type = var_obj._type._type
-        #print "vt", type(var_type)
+        # print "vt", type(var_type)
         #print "vo", type(var_obj)
         var_node = VariableNode(var_type, var_obj, var_name)
         subtree = self._selector(var_node)
@@ -690,13 +699,10 @@ class Parser:
                 # check if it's an array
                 if not isinstance(return_object.variable._type, Array):
                     sys.stderr.write("error: not an array")
-                # what happens if expression is x+1 or something?
                 node = return_object
-                # making assumption that exp list just contains accessible numbers
-                # need to check this
                 for e in exp_list:
                     if not isinstance(e, NumberNode):
-                        sys.stderr.write("error: nonconstant found in selector")
+                        sys.stderr.write("error: nonconstant found in selector\n")
                 # type refers to the type of the variable node
                 # what should the type be here??
                 index_type = return_object.type
@@ -769,7 +775,6 @@ class Parser:
         self.observer.end_expression_list()
         return exp_list
 
-
 def main():
     f = open("../compilers4/test2.txt")
     input_string = ""
@@ -779,7 +784,7 @@ def main():
     f.close()
     s = Scanner(input_string)
     token_list = s.all()
-    p = Parser(token_list=token_list, print_symbol_table=0)
+    p = Parser(token_list=token_list, print_symbol_table=1)
     p.parse()
 
 main()

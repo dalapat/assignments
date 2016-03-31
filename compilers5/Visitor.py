@@ -49,7 +49,8 @@ class Visitor:
         array._type.visit(self)
         self.write("length:\n")
         self.indent += 2
-        self.write(str(array.length.value) + '\n')
+        # self.write(str(array.length.value) + '\n')
+        self.write(str(array.length) + '\n')
         self.indent -= 2
         self.indent -= 2
         self.write("END ARRAY\n")
