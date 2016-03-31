@@ -485,7 +485,7 @@ class Parser:
             curr._next = temp
             curr = temp
         self.observer.end_instructions()
-        return curr
+        return head
 
     # set expectation of creating a Instruction
     # by following the Instruction production
