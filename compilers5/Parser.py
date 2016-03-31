@@ -651,7 +651,11 @@ class Parser:
         # variable's type?
         # if its a constant, can i just make a numbernode and return it?
         if isinstance(var_obj, Constant):
+            # what should I do if i get a constant here? if i just make a
+            # number node and return it, then selector won't be printed.
+            # but selector shouldn't be accessed anyway
             num_node = NumberNode(var_obj)
+            # var_type = var_obj._type
             self.observer.end_designator()
             return num_node
         if isinstance(var_obj._type, Integer):
@@ -661,7 +665,7 @@ class Parser:
         elif isinstance(var_obj._type, Record):
             var_type = var_obj._type
         else:
-            sys.stderr.write("error: oh shit")
+            sys.stderr.write("error: oh shit\n")
         # var_type = var_obj._type
         # what type should go here? should i distinguish by possible types?
         # var_type = var_obj._type._type
@@ -767,7 +771,7 @@ class Parser:
 
 
 def main():
-    f = open("../compilers4/test.txt")
+    f = open("../compilers4/test2.txt")
     input_string = ""
     for line in f:
         input_string += line
