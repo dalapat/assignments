@@ -5,11 +5,12 @@ from Integer import integerInstance
 import sys
 class VariableNode(ExpressionNode):
 
-    def __init__(self, type, variable, var_name):
-        ExpressionNode.__init__(self, type)
+    def __init__(self, _type, variable, var_name):
+        ExpressionNode.__init__(self, _type)
         self.variable = variable
         self.variable_name = var_name
 
     def to_string(self):
-        # how to get name from variable object
-        pass
+        sys.stdout.write("---\n")
+        sys.stdout.write("VariableNode\n")
+        sys.stdout.write("name: {0}\ntype: {1}".format(self.variable_name, self.type)+"\n")

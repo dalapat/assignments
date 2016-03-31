@@ -16,6 +16,11 @@ from IndexNode import IndexNode
 from NumberNode import NumberNode
 from BinaryNode import BinaryNode
 from FieldNode import FieldNode
+from AssignNode import AssignNode
+from IfNode import IfNode
+from RepeatNode import RepeatNode
+from WriteNode import WriteNode
+from ReadNode import ReadNode
 
 from Visitor import Visitor
 import sys
@@ -127,10 +132,14 @@ class Parser:
                 sys.stderr.write("error: attempted to redefine identifier\n")
             self.match("=")
             e = self._expression()
+            if not isinstance(e, NumberNode):
+                self.total_error_flag = 1
+                sys.stderr.write("error: constdecl received nonconst exp\n")
+                # exit(1)
             self.match(";")
             # add it we formed a constant
-            if isinstance(e, Constant): # is it constant object or constant name
-                self.program_scope.insert(name, e)
+            if isinstance(e.constant, Constant): # is it constant object or constant name
+                self.program_scope.insert(name, e.constant)
             else:
                 self.total_error_flag = 1
                 sys.stderr.write("error: attempted to define const with nonconst object\n")
@@ -265,11 +274,13 @@ class Parser:
     # by following the Expression production
     def _expression(self):
         self.observer.begin_expression()
+        '''operation = -1
         if self.token_list[self.current].kind == self.kind_map["+"]:
-            self.match("+")
+            operation = self.match("+")
         elif self.token_list[self.current].kind == self.kind_map["-"]:
-            self.match("-")
-        self._term()
+            operation = self.match("-")
+        subtree = self._term()
+
         while (self.token_list[self.current].kind == self.kind_map["+"]) or \
                 (self.token_list[self.current].kind == self.kind_map["-"]):
             if self.token_list[self.current].kind == self.kind_map["+"]:
@@ -279,16 +290,62 @@ class Parser:
             else:
                 self.total_error_flag = 1
                 sys.stderr.write("error: expecting \'+\' or \'-\'\n")
-            self._term()
+            self._term()'''
+        node = self.nexpression()
+        node.to_string()
         self.observer.end_expression()
-        e = Constant(self.universe.find("INTEGER"), 5)
-        return e
+        # e = Constant(self.universe.find("INTEGER"), 5)
+        # print "e", type(node)
+        return node
+
+    def nexpression(self):
+        outer_operation = -1
+        if self.token_list[self.current].kind == self.kind_map["+"]:
+            outer_operation = self.match("+")
+        elif self.token_list[self.current].kind == self.kind_map["-"]:
+            outer_operation = self.match("-")
+        subtree = self._term()
+        node = subtree
+        # if operation == '-':
+        #    bn = BinaryNode(operation, NumberNode(Constant(integerInstance, 0)), subtree)
+        if (self.token_list[self.current].kind == self.kind_map["+"]) or \
+                (self.token_list[self.current].kind == self.kind_map["-"]):
+            inner_operation = ""
+            if self.token_list[self.current].kind == self.kind_map["+"]:
+                inner_operation = self.match("+")
+            elif self.token_list[self.current].kind == self.kind_map["-"]:
+                inner_operation = self.match("-")
+            else:
+                self.total_error_flag = 1
+                sys.stderr.write("error: expecting \'+\' or \'-\'\n")
+            subtree_right = self._term()
+            if isinstance(subtree.type, Constant) and isinstance(subtree_right.type, Constant):
+                result = 0
+                if inner_operation == "+":
+                    result = int(subtree.type.value) + int(subtree_right.type.value)
+                elif inner_operation == "-":
+                    result = int(subtree.type.value) + int(subtree_right.type.value)
+                else:
+                    pass
+                c = Constant(integerInstance, result)
+                num_node = NumberNode(c)
+                node = num_node
+            else:
+                bn = BinaryNode(inner_operation, subtree, subtree_right)
+                node = bn
+        else:
+            node = subtree
+        if outer_operation == "-":
+            bn = BinaryNode(outer_operation,
+                            NumberNode(Constant(integerInstance, 0)), node)
+            node = bn
+        return node
 
     # set expectation of creating a Term
     # by following the Term production
     def _term(self):
         self.observer.begin_term()
-        operation = None
+        '''operation = None
         subtree_left = self._factor()
         node = subtree_left
         while (self.token_list[self.current].kind == self.kind_map["*"])or \
@@ -304,9 +361,45 @@ class Parser:
                 self.total_error_flag = 1
                 sys.stderr.out("error: expecting \'*\', \'DIV\', or \'MOD\'\n")
             subtree_right =  self._factor()
-            temp = BinaryNode(operation, subtree_left, subtree_right)
+            temp = BinaryNode(operation, subtree_left, subtree_right)'''
+        node = self.nterm()
         #return singular factor or binary node
         self.observer.end_term()
+        return node
+
+    def nterm(self):
+        sub_left = self._factor()
+        node = sub_left
+        operation = 0
+        if (self.token_list[self.current].kind == self.kind_map["*"])or \
+            (self.token_list[self.current].kind == self.kind_map["DIV"]) or \
+            (self.token_list[self.current].kind == self.kind_map["MOD"]):
+            if self.token_list[self.current].kind == self.kind_map["*"]:
+                 operation = self.match("*")
+            elif self.token_list[self.current].kind == self.kind_map["DIV"]:
+                 operation = self.match("DIV")
+            elif self.token_list[self.current].kind == self.kind_map["MOD"]:
+                 operation = self.match("MOD")
+            else:
+                self.total_error_flag = 1
+                sys.stderr.out("error: expecting \'*\', \'DIV\', or \'MOD\'\n")
+            sub_right = self.nterm()
+            if isinstance(sub_left.type, Constant) and isinstance(sub_right.type, Constant):
+                result = 0
+                if operation == "*":
+                    result = int(sub_left.type.value) * int(sub_right.type.value)
+                elif operation == "DIV":
+                    result = int(sub_left.type.value) / int(sub_right.type.value)
+                elif operation == "MOD":
+                    result = int(sub_left.type.value) % int(sub_right.type.value)
+                c = Constant(integerInstance, result)
+                num_node = NumberNode(c)
+                return num_node
+            else:
+                bn = BinaryNode(operation, sub_left, sub_right)
+                return bn
+        else:
+            return sub_left
 
     # set expectation of creating a Factor
     # by following the Factor production
@@ -376,10 +469,18 @@ class Parser:
     def _assign(self):
         # print "Assign"
         self.observer.begin_assign()
-        self._designator()
+        subtree_left = self._designator()
+        if not isinstance(subtree_left, VariableNode):
+            sys.stderr.write("error: assign")
+        stl_type = subtree_left.type
         self.match(":=")
-        self._expression()
+        subtree_right = self._expression()
+        str_type = subtree_right.type
+        if not type(stl_type) == type(str_type):
+            sys.stderr.write("error: assigning things that don't have the same type")
+        assign_node = AssignNode(None, subtree_left, subtree_right)
         self.observer.end_assign()
+        return assign_node
 
     # set expectation of creating a If
     # by following the If production
@@ -387,36 +488,57 @@ class Parser:
         # print "If"
         self.observer.begin_if()
         self.match("IF")
-        self._condition()
+        condition = self._condition()
         self.match("THEN")
-        self._instructions()
+        instructions_true = self._instructions()
+        instructions_false = None
         if self.token_list[self.current].kind == self.kind_map["ELSE"]:
             self.match("ELSE")
-            self._instructions()
+            instructions_false = self._instructions()
         self.match("END")
         self.observer.end_if()
+        if_node = IfNode(None, condition, instructions_true, instructions_false)
+        return if_node
 
     # set expectation of creating a Repeat
     # by following the Repeat production
     def _repeat(self):
         self.observer.begin_repeat()
         self.match("REPEAT")
-        self._instructions()
+        instructions = self._instructions()
         self.match("UNTIL")
-        self._condition()
+        condition = self._condition()
         self.match("END")
         self.observer.end_repeat()
+        repeat_node = RepeatNode(None, condition, instructions)
+        return repeat_node
+
 
     # set expectation of creating a While
     # by following the While production
     def _while(self):
         self.observer.begin_while()
         self.match("WHILE")
-        self._condition()
+        condition = self._condition()
         self.match("DO")
-        self._instructions()
+        instructions = self._instructions()
         self.match("END")
         self.observer.end_while()
+        negation_condition_node = self.get_negation(condition)
+        repeat_node = RepeatNode(None, negation_condition_node, instructions)
+        if_node = IfNode(None, condition, repeat_node)
+        return if_node
+
+    def get_negation(self, condition_node):
+        relation_negation = {"=":"#",
+                             "#":"=",
+                             "<":">",
+                             ">":"<",
+                             "<=":">=",
+                             ">=":"<="}
+        negation_condition_node = ConditionNode(condition_node.exp_left, condition_node.exp_right,
+                                                relation_negation[condition_node.relation])
+        return negation_condition_node
 
     # set expectation of creating a Condition
     # by following the Condition production
@@ -457,16 +579,28 @@ class Parser:
     def _write(self):
         self.observer.begin_write()
         self.match("WRITE")
-        self._expression()
+        expression = self._expression()
+        if not isinstance(expression.type, Integer):
+            self.total_error_flag = 1
+            sys.stderr.write("error: expression in write not of type integer")
+            #exit(1)
         self.observer.end_write()
+        write_node = WriteNode(None, expression)
+        return write_node
 
     # set expectation of creating a Read
     # by following the Read production
     def _read(self):
         self.observer.begin_read()
         self.match("READ")
-        self._designator()
+        designator = self._designator()
+        if not isinstance(designator.type, Integer):
+            self.total_error_flag = 1
+            sys.stderr.write("error: designator in read not an integer")
+            #exit(1)
         self.observer.end_read()
+        read_node = ReadNode(None, designator)
+        return read_node
 
     # set expectation of creating a Designator
     # by following the Designator production
@@ -475,8 +609,10 @@ class Parser:
         var_name = self.match("IDENTIFIER")
         var_obj = self.program_scope.find(var_name)
         # check var is actually variable object
-        if not isinstance(var_obj, Variable):
-            sys.stderr.write("error: variable name not pointing var")
+        # why can this be a constant? how does this affect lower functions?
+        if not (isinstance(var_obj, Variable) or isinstance(var_obj, Constant)):
+            print "v", type(var_obj)
+            sys.stderr.write("error: variable name not pointing var or const\n")
             # exit(1)
         # is the current type of the AST node at this point just the
         # variable's type?
@@ -566,9 +702,9 @@ class Parser:
         self.observer.end_expression_list()
         return exp_list
 
-'''
+
 def main():
-    f = open("test2.txt")
+    f = open("../compilers4/test2.txt")
     input_string = ""
     for line in f:
         input_string += line
@@ -576,8 +712,7 @@ def main():
     f.close()
     s = Scanner(input_string)
     token_list = s.all()
-    p = Parser(token_list=token_list, print_symbol_table=1)
+    p = Parser(token_list=token_list, print_symbol_table=0)
     p.parse()
 
 main()
-'''
