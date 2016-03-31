@@ -62,8 +62,9 @@ class Parser:
                 self.visitor.end()
             elif self.print_symbol_table == 2:
                 currinstruction = instructions
-                while(currinstruction._next is not None):
-                    currinstruction.visit()
+                while(currinstruction is not None):
+                    currinstruction.visit(self.visitor)
+                    currinstruction = currinstruction._next
 
     # check if the currently parsed token is a token we are
     # expecting to find
@@ -704,7 +705,8 @@ class Parser:
                     sys.stderr.write("error: not an array")
                 node = return_object
                 for e in exp_list:
-                    if not isinstance(e, NumberNode):
+                    #if not isinstance(e, NumberNode):
+                    if not isinstance(e.type, Integer):
                         sys.stderr.write("error: nonconstant found in selector\n")
                 # type refers to the type of the variable node
                 # what should the type be here??
@@ -778,9 +780,9 @@ class Parser:
         self.observer.end_expression_list()
         return exp_list
 
-'''
+
 def main():
-    f = open("../compilers4/test2.txt")
+    f = open("test5.txt")
     input_string = ""
     for line in f:
         input_string += line
@@ -788,8 +790,7 @@ def main():
     f.close()
     s = Scanner(input_string)
     token_list = s.all()
-    p = Parser(token_list=token_list, print_symbol_table=1)
+    p = Parser(token_list=token_list, print_symbol_table=2, visitor=ASTvisitor())
     p.parse()
 
 main()
-'''

@@ -16,4 +16,4 @@ class VariableNode(ExpressionNode):
         sys.stdout.write("name: {0}\ntype: {1}".format(self.variable_name, self.type)+"\n")
 
     def visit(self, visitor):
-        visitor.visitVairbaleNode(self)
+        visitor.visitVariableNode(self)

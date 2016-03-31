@@ -28,7 +28,7 @@ class ASTvisitor:
         self.write("condition =>")
         repeat_node.condition.visit(self)
         self.write("instructions =>")
-        repeat_node.instructions.visit()
+        repeat_node.instructions.visit(self)
         self.indent -= 2
 
     def visitConditionNode(self, condition_node):
