@@ -23,6 +23,7 @@ from WriteNode import WriteNode
 from ReadNode import ReadNode
 
 from Visitor import Visitor
+from ASTvisitor import ASTvisitor
 import sys
 
 
@@ -51,7 +52,7 @@ class Parser:
 
     # parse the token list
     def parse(self):
-        self._program()
+        instructions = self._program()
         # do not print any output if error occurs
         if self.total_error_flag == 0:
             if self.print_symbol_table == 0:
@@ -60,7 +61,9 @@ class Parser:
                 self.visitor.visitScope(self.program_scope)
                 self.visitor.end()
             elif self.print_symbol_table == 2:
-                pass
+                currinstruction = instructions
+                while(currinstruction._next is not None):
+                    currinstruction.visit()
 
     # check if the currently parsed token is a token we are
     # expecting to find
@@ -775,6 +778,7 @@ class Parser:
         self.observer.end_expression_list()
         return exp_list
 
+'''
 def main():
     f = open("../compilers4/test2.txt")
     input_string = ""
@@ -788,3 +792,4 @@ def main():
     p.parse()
 
 main()
+'''
