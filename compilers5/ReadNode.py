@@ -3,8 +3,8 @@ import sys
 
 class ReadNode(InstructionNode):
 
-    def __init__(self, next, location):
-        InstructionNode.__init__(self, next)
+    def __init__(self, _next, location):
+        InstructionNode.__init__(self, _next)
         self.location = location
 
     def to_string(self):

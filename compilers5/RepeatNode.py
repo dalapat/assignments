@@ -3,8 +3,8 @@ from InstructionNode import InstructionNode
 import sys
 class RepeatNode(InstructionNode):
 
-    def __init__(self, next, condition, instructions):
-        InstructionNode.__init__(self, next)
+    def __init__(self, _next, condition, instructions):
+        InstructionNode.__init__(self, _next)
         self.condition = condition
         self.instructions = instructions
 

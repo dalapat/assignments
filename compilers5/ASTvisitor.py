@@ -21,6 +21,8 @@ class ASTvisitor:
         self.write("expression =>")
         assign_node.expression.visit(self)
         self.indent -= 2
+        if assign_node._next is not None:
+            assign_node._next.visit(self)
 
     def visitRepeatNode(self, repeat_node):
         self.indent += 2
@@ -30,6 +32,8 @@ class ASTvisitor:
         self.write("instructions =>")
         repeat_node.instructions.visit(self)
         self.indent -= 2
+        if repeat_node._next is not None:
+            repeat_node._next.visit(self)
 
     def visitConditionNode(self, condition_node):
         self.indent += 2
@@ -46,6 +50,8 @@ class ASTvisitor:
         self.write("location =>")
         read_node.location.visit(self)
         self.indent -= 2
+        if read_node._next is not None:
+            read_node._next.visit(self)
 
     def visitWriteNode(self, write_node):
         self.indent += 2
@@ -53,6 +59,8 @@ class ASTvisitor:
         self.write("expression =>")
         write_node.expression.visit(self)
         self.indent -= 2
+        if write_node._next is not None:
+            write_node._next.visit(self)
 
     def visitWhile(self):
         pass
@@ -68,6 +76,8 @@ class ASTvisitor:
             self.write("false =>")
             if_node.instructions_false.visit(self)
         self.indent -= 2
+        if if_node._next is not None:
+          if_node._next.visit(self)
 
     def visitBinaryNode(self, binary_node):
         self.indent += 2

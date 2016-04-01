@@ -3,8 +3,8 @@ import sys
 
 class IfNode(InstructionNode):
 
-    def __init__(self, next, condition, instructions_true, instructions_false):
-        InstructionNode.__init__(self, next)
+    def __init__(self, _next, condition, instructions_true, instructions_false):
+        InstructionNode.__init__(self, _next)
         self.condition = condition
         self.instructions_true = instructions_true
         self.instructions_false = instructions_false

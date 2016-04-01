@@ -4,8 +4,8 @@ import sys
 
 class AssignNode(InstructionNode):
 
-    def __init__(self, next, location, expression):
-        InstructionNode.__init__(self, next)
+    def __init__(self, _next, location, expression):
+        InstructionNode.__init__(self, _next)
         self.location = location
         self.expression = expression
 
