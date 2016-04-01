@@ -63,9 +63,9 @@ class Parser:
             elif self.print_symbol_table == 2:
                 currinstruction = instructions
                 self.visitor.start()
-                while(currinstruction is not None):
-                    currinstruction.visit(self.visitor)
-                    currinstruction = currinstruction._next
+                # while(currinstruction is not None):
+                currinstruction.visit(self.visitor)
+                # currinstruction = currinstruction._next
 
     # check if the currently parsed token is a token we are
     # expecting to find
