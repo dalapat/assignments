@@ -531,7 +531,7 @@ class Parser:
         subtree_right = self._expression()
         str_type = subtree_right.type
         if not type(stl_type) == type(str_type):
-            sys.stderr.write("error: assigning things that don't have the same type")
+            sys.stderr.write("error: assigning things that don't have the same type\n")
         assign_node = AssignNode(None, subtree_left, subtree_right)
         self.observer.end_assign()
         return assign_node
@@ -661,32 +661,30 @@ class Parser:
     def _designator(self):
         self.observer.begin_designator()
         var_name = self.match("IDENTIFIER")
-        var_obj = self.program_scope.find(var_name)
-        if not (isinstance(var_obj, Variable) or isinstance(var_obj, Constant)):
-            # print "v", type(var_obj)
+        ret_obj = self.program_scope.find(var_name)
+        pass_obj = None
+        if isinstance(ret_obj, Variable):
+            pass_obj = VariableNode(ret_obj._type, ret_obj, var_name)
+        elif isinstance(ret_obj, Constant):
+            pass_obj = NumberNode(ret_obj)
+        else:
             sys.stderr.write("error: variable name not pointing var or const\n")
             # exit(1)
-        if isinstance(var_obj, Constant):
+        '''if isinstance(var_obj, Constant):
             num_node = NumberNode(var_obj)
-            # var_type = var_obj._type
             subtree = self._selector(num_node)
             self.observer.end_designator()
-            return subtree
-        if isinstance(var_obj._type, Integer):
+            return subtree'''
+        '''if isinstance(var_obj._type, Integer):
             var_type = var_obj._type
         elif isinstance(var_obj._type, Array):
             var_type = var_obj._type._type
         elif isinstance(var_obj._type, Record):
             var_type = var_obj._type
         else:
-            sys.stderr.write("error: designator\n")
-        # var_type = var_obj._type
-        # what type should go here? should i distinguish by possible types?
-        # var_type = var_obj._type._type
-        # print "vt", type(var_type)
-        #print "vo", type(var_obj)
-        var_node = VariableNode(var_type, var_obj, var_name)
-        subtree = self._selector(var_node)
+            sys.stderr.write("error: designator\n")'''
+        #var_node = VariableNode(var_type, var_obj, var_name)
+        subtree = self._selector(pass_obj)
         self.observer.end_designator()
         return subtree
 
@@ -698,48 +696,33 @@ class Parser:
         while (self.token_list[self.current].kind == self.kind_map["["]) \
                 or (self.token_list[self.current].kind == self.kind_map["."]):
             if self.token_list[self.current].kind == self.kind_map["["]:
+                if not isinstance(return_object.type, Array):
+                    sys.stderr.write("error: not an array")
                 self.match("[")
                 exp_list = self._expression_list()
                 self.match("]")
                 # check if it's an array
-                if not isinstance(return_object.variable._type, Array):
-                    sys.stderr.write("error: not an array")
+                # if not isinstance(return_object.variable._type, Array):
                 node = return_object
                 for e in exp_list:
-                    #if not isinstance(e, NumberNode):
                     if not isinstance(e.type, Integer):
-                        sys.stderr.write("error: nonconstant found in selector\n")
-                # type refers to the type of the variable node
-                # what should the type be here??
-                index_type = return_object.type
+                        sys.stderr.write("error: noninteger found in selector\n")
+                index_type = return_object.type._type
                 # print "it", type(index_type)
                 # print "index type: ", type(index_type)
                 index_node = IndexNode(index_type, node, exp_list[0])
                 for i in range(1, len(exp_list)):
                     node = index_node
-                    index_type = node.type
+                    index_type = node.type._type
                     index_node = IndexNode(index_type, node, exp_list[i])
                 return_object = index_node
             elif self.token_list[self.current].kind == self.kind_map["."]:
-                # how to make field
                 self.match(".")
                 field_var_name = self.match("IDENTIFIER")
-                # throws an error on field_var because it gets an index node
-                # and can't find variable attribute
                 if not isinstance(return_object.type, Record):
-                    # sys.stdout.write("TYPE1: " + str(type(return_object)) + "\n")
-                    # sys.stdout.write("return_object.type: " + str(type(return_object.type)) + "\n")
                     sys.stderr.write("error: attempting to select field from non-record type\n")
-                if isinstance(return_object, VariableNode):
-                    if(return_object.variable.type.scope.local(field_var_name)):
-                        # local doesn't return, should it?
-                        field_var_obj = return_object.variable.type.scope.find(field_var_name)
-                elif isinstance(return_object, IndexNode) or isinstance(return_object, FieldNode):
-                    if(return_object.location.type.scope.local(field_var_name)):
-                        field_var_obj = return_object.location.type.scope.find(field_var_name)
-                else:
-                    sys.stderr.write("error: selector\n")
-                # field_var_obj = return_object.variable._type.local(field_var_name)
+                if(return_object.type.scope.local(field_var_name)):
+                    field_var_obj = return_object.type.scope.find(field_var_name)
                 field_type = field_var_obj._type
                 field_right_var_obj = VariableNode(field_type, field_var_obj, field_var_name)
                 node = FieldNode(field_type, return_object, field_right_var_obj)
@@ -783,7 +766,10 @@ class Parser:
 
 '''
 def main():
-    f = open("../compilers4/test2.txt")
+    #f = open("../compilers4/test2.txt")
+    #f = open("../compilers4/test.txt")
+    #f = open("test5.txt")
+    #f = open("test6.txt")
     input_string = ""
     for line in f:
         input_string += line
