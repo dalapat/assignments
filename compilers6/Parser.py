@@ -72,8 +72,10 @@ class Parser:
             elif self.print_symbol_table == 3:
                 environment = self.program_scope.make_environment()
                 stack = []
-                self.interpret(instructions, environment, stack)
-
+                curr = instructions
+                while curr is not None:
+                    self.interpret(curr, environment, stack)
+                    curr = curr._next
 
     def interpret(self, ast, environment, stack):
         if isinstance(ast, NumberNode):
@@ -120,15 +122,24 @@ class Parser:
             self.interpret(ast.location, environment, stack)
             loc = stack.pop()
             input = sys.stdin.read()
+            #input = "16"
             try:
                 num = int(input)
             except:
                 sys.stderr.write("error: not an integer")
             loc.set(num)
+            #stack.append(loc)
         elif isinstance(ast, WriteNode):
             self.interpret(ast.expression, environment, stack)
             exp = stack.pop()
-            sys.stdout.write(str(exp) + '\n')
+            output = ""
+            if isinstance(exp, IntegerBox):
+                output = str(exp.get())
+            elif isinstance(exp, int):
+                output = str(exp)
+            else:
+                sys.stderr.write("error: unexpected")
+            sys.stdout.write(output + '\n')
         elif isinstance(ast, RepeatNode):
             flag = "FALSE"
             while not flag:
@@ -190,8 +201,6 @@ class Parser:
             stack.append(arr.index(index))
         else:
             pass
-
-
 
     # check if the currently parsed token is a token we are
     # expecting to find
