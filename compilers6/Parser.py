@@ -71,6 +71,8 @@ class Parser:
                 # currinstruction = currinstruction._next
             elif self.print_symbol_table == 3:
                 environment = self.program_scope.make_environment()
+                stack = []
+                self.interpret(instructions, environment, stack)
 
 
     def interpret(self, ast, environment, stack):
@@ -126,8 +128,7 @@ class Parser:
         elif isinstance(ast, WriteNode):
             self.interpret(ast.expression, environment, stack)
             exp = stack.pop()
-            output = exp.get()
-            sys.stdout.write(int(output) + '\n')
+            sys.stdout.write(str(exp) + '\n')
         elif isinstance(ast, RepeatNode):
             flag = "FALSE"
             while not flag:
@@ -182,10 +183,11 @@ class Parser:
             self.interpret(ast.location, environment, stack)
             self.interpret(ast.expression, environment, stack)
             index = stack.pop()
-            if not isinstance(index, IntegerBox):
-                sys.stderr.write("error: accessing array with noninteger index")
+            #print type(index)
+            #if not isinstance(index, IntegerBox):
+            #    sys.stderr.write("error: accessing array with noninteger index")
             arr = stack.pop()
-            stack.append(arr.index(index.value))
+            stack.append(arr.index(index))
         else:
             pass
 
@@ -437,9 +439,9 @@ class Parser:
             if isinstance(subtree, NumberNode) and isinstance(subtree_right, NumberNode):
                 result = 0
                 if inner_operation == "+":
-                    result = int(subtree.type.value) + int(subtree_right.type.value)
+                    result = int(subtree.constant.value) + int(subtree_right.constant.value)
                 elif inner_operation == "-":
-                    result = int(subtree.type.value) + int(subtree_right.type.value)
+                    result = int(subtree.constant.value) + int(subtree_right.constant.value)
                 else:
                     pass
                 c = Constant(integerInstance, result)
@@ -828,6 +830,7 @@ def main():
     #f = open("../compilers5/test5.txt")
     #f = open("../compilers5/test6.txt")
     f = open("test.txt")
+    #f = open("test2.txt")
     input_string = ""
     for line in f:
         input_string += line
