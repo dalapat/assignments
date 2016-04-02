@@ -124,7 +124,7 @@ class Parser:
                 num = int(input)
             except:
                 sys.stderr.write("error: not an integer")
-            loc.set(input)
+            loc.set(num)
         elif isinstance(ast, WriteNode):
             self.interpret(ast.expression, environment, stack)
             exp = stack.pop()
@@ -829,8 +829,9 @@ def main():
     #f = open("../compilers4/test.txt")
     #f = open("../compilers5/test5.txt")
     #f = open("../compilers5/test6.txt")
-    f = open("test.txt")
+    #f = open("test.txt")
     #f = open("test2.txt")
+    f = open("test3.txt")
     input_string = ""
     for line in f:
         input_string += line

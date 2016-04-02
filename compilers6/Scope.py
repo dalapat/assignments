@@ -45,7 +45,7 @@ class Scope:
 
     def make_box(self, type):
         if isinstance(type, Integer):
-            return IntegerBox
+            return IntegerBox()
         elif isinstance(type, Array):
             list = []
             for i in range(type.length):
