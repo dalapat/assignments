@@ -7,8 +7,8 @@ class RecordBox(Box):
         self.fields = fields
         self.length = len(fields)
 
-    def get_field_value(self):
-        pass
+    def get_field(self, field):
+        return self.fields[field]
 
     def copy(self, record_box):
         if not isinstance(record_box, RecordBox):

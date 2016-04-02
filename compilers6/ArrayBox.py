@@ -7,7 +7,7 @@ class ArrayBox(Box):
         self.length = len(list)
 
     def index(self, i):
-        if 0 <= i <= self.length:
+        if 0 <= i < self.length:
             return self.list[i]
         else:
             sys.stderr.write("error: index out of bounds")
