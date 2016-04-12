@@ -87,7 +87,7 @@ class Parser:
                 #environment = self.program_scope.make_code_generator_environment()
                 #print environment
                 self.program_scope.make_code_generator_environment()
-                print 1
+
 
 
     # check if the currently parsed token is a token we are

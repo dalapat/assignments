@@ -14,6 +14,7 @@ class Scope:
     def __init__(self, outer_scope):
         self.outer_scope = outer_scope
         self.symbol_table = {}
+        self.stsize = 0
 
     # insert a name and associated type into the symbol table
     def insert(self, name, _type):
@@ -53,11 +54,7 @@ class Scope:
                 self.symbol_table[identifier].set_offset(offset)
                 size = self.make_offset(self.symbol_table[identifier]._type)
                 offset += size
-
-    def test(self):
-        for identifier in self.symbol_table:
-            if isinstance(self.symbol_table[identifier], Variable):
-                self.symbol_table[identifier].set_offset(self.make_offset(self.symbol_table[identifier]._type))
+        self.stsize = offset
 
     def make_box(self, type):
         if isinstance(type, Integer):

@@ -10,3 +10,6 @@ class InstructionNode(Node):
 
     def int_visit(self, interpreter, environment):
         interpreter.interpret(self, environment)
+
+    def cg_visit(self, generator):
+        generator.code_generator(self)
