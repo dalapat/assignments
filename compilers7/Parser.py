@@ -25,6 +25,7 @@ from IntegerBox import IntegerBox
 from ArrayBox import ArrayBox
 from RecordBox import RecordBox
 from Interpreter import Interpreter
+from CodeGenerator import CodeGenerator
 
 from Visitor import Visitor
 from ASTvisitor import ASTvisitor
@@ -42,7 +43,8 @@ class Parser:
 
     # initializes Parser instance and parses a list of tokens
     # cmd line arguments determine output type
-    def __init__(self, observer = Observer(), token_list=[], print_symbol_table = 0, visitor = Visitor()):
+    def __init__(self, observer = Observer(), filename = "", token_list=[],
+                 print_symbol_table = 0, visitor = Visitor()):
         self.current = 0 # current position in token list
         self.token_list = token_list # token list received from scanner
         self.kind_map = Token.kind_map # dictionary of token kinds
@@ -54,6 +56,7 @@ class Parser:
         self.current_scope = self.program_scope # current scope for switching between scopes
         self.print_symbol_table = print_symbol_table # determines whether to print cst or st
         self.visitor = visitor
+        self.filename = filename
 
     # parse the token list
     def parse(self):
@@ -87,8 +90,14 @@ class Parser:
                 #environment = self.program_scope.make_code_generator_environment()
                 #print environment
                 self.program_scope.make_code_generator_environment()
-
-
+                c = CodeGenerator(self.program_scope, 0, instructions)
+                c.start()
+                c.cgoutput()
+            elif self.print_symbol_table == 5:
+                self.program_scope.make_code_generator_environment()
+                c = CodeGenerator(self.program_scope, 1, instructions, filename=self.filename+".s")
+                c.start()
+                c.cgoutput()
 
     # check if the currently parsed token is a token we are
     # expecting to find
@@ -733,7 +742,7 @@ class Parser:
         self.observer.end_expression_list()
         return exp_list
 
-
+'''
 def main():
     #f = open("../compilers4/test2.txt")
     #f = open("../compilers4/test.txt")
@@ -741,7 +750,7 @@ def main():
     #f = open("../compilers5/test6.txt")
     #f = open("test.txt")
     #f = open("test2.txt")
-    f = open("../compilers6/test4.txt") # 20 23 45
+    f = open("test.txt") # 20 23 45
     input_string = ""
     for line in f:
         input_string += line
@@ -749,7 +758,8 @@ def main():
     f.close()
     s = Scanner(input_string)
     token_list = s.all()
-    p = Parser(token_list=token_list, print_symbol_table=4, visitor=ASTvisitor())
+    p = Parser(token_list=token_list, print_symbol_table=5, visitor=ASTvisitor(), filename="test")
     p.parse()
     #print p.program_scope
 main()
+'''

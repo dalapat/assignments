@@ -13,45 +13,79 @@ from FieldNode import FieldNode
 from IndexNode import IndexNode
 from IntegerBox import IntegerBox
 
+# class to generate ARM assembly code from SIMPLE program
 class CodeGenerator:
 
-    def __init__(self, scope):
-        self.scope = scope
+    # initialize code generator
+    def __init__(self, scope, flag, ast, filename=""):
+        self.scope = scope # scope to reference during traversal
+        self.flag = flag # print to stdout or file
+        self.output_string = "" # assembly code
+        self.ast = ast # ast to parse
+        self.filename = filename # filename to write to
 
+    # ARM headers, unfinished
     def start(self):
-        sys.stdout.write("\t\t.text\n")
-        sys.stdout.write(".Ltext0:\n")
-        sys.stdout.write("\t\t.globl main\n")
-        sys.stdout.write("\t\t.type main, @function\n")
-        sys.stdout.write("main:\n")
+        self.output_string += "\t\t.text\n"
+        self.output_string += ".Ltext0:\n"
+        self.make_format()
+        self.output_string += "\t\t.globl main\n"
+        self.output_string += "\t\t.type main, @function\n"
+        self.output_string += "main:\n"
+        self.code_generator(self.ast)
 
+    # ARM printing
+    def make_format(self):
+        self.output_string += ".LCO:\n"
+        self.cgwrite(".string \"%d\\n\"")
+        self.cgwrite(".data")
+        self.cgwrite(".align 4")
+        self.cgwrite(".type   format, @object")
+        self.cgwrite(".size   format, 4")
+        self.output_string += "format:\n"
+        self.cgwrite(".long   .LC0")
+        self.cgwrite(".align 4")
+        self.cgwrite(".type   data, @object")
+        self.cgwrite(".size   data, 4")
+
+    # format ARM assembly
     def cgwrite(self, string):
-        sys.stdout.write("\t\t{0}\n".format(string))
+        self.output_string += "\t\t{0}\n".format(string)
 
+    # write to stdout or file
+    def cgoutput(self):
+        if self.flag == 0:
+            sys.stdout.write(self.output_string)
+        elif self.flag == 1:
+            f = open(self.filename, "w")
+            f.write(self.output_string)
+            f.close()
+
+    # perform left to right post order traversal on ast
     def code_generator(self, ast):
         if isinstance(ast, NumberNode):
-            sys.stdout.write("\t\tldr r2, ={0}\n".format(ast.constant.value))
-            sys.stdout.write("\t\tpush r2\n")
+            self.output_string += "\t\tldr r2, ={0}\n".format(ast.constant.value)
+            self.output_string += "\t\tpush r2\n"
         elif isinstance(ast, BinaryNode):
             self.code_generator(ast.exp_left)
             self.code_generator(ast.exp_right)
-            sys.stdout.write("\t\tpop r2\n")
-            sys.stdout.write("\t\tpop r3\n")
+            self.output_string += "\t\tpop r2\n"
+            self.output_string += "\t\tpop r3\n"
             if ast.operator == "+":
-                sys.stdout.write("\t\tadd r2, r2, r3\n")
-                sys.stdout.write("\t\tpush r2\n")
+                self.output_string += "\t\tadd r2, r2, r3\n"
+                self.output_string += "\t\tpush r2\n"
             elif ast.operator == "-":
-                sys.stdout.write("\t\tsub r2, r2, r3\n")
-                sys.stdout.write("\t\tpush r2\n")
+                self.output_string += "\t\tsub r2, r2, r3\n"
+                self.output_string += "\t\tpush r2\n"
             elif ast.operator == "*":
-                sys.stdout.write("\t\tmul r2, r2, r3\n")
-                sys.stdout.write("\t\tpush r2\n")
+                self.output_string += "\t\tmul r2, r2, r3\n"
+                self.output_string += "\t\tpush r2\n"
             elif ast.operator == "DIV":
-                sys.stdout.write("\t\tsdiv r2, r2, r3\n")
-                sys.stdout.write("\t\tpush r2\n")
+                self.output_string += "\t\tsdiv r2, r2, r3\n"
+                self.output_string += "\t\tpush r2\n"
             elif ast.operator == "MOD":
-                sys.stdout.write("\t\tmod r2, r2, r3\n")
-                sys.stdout.write("\t\tpush r2\n")
+                self.output_string += "\t\tmod r2, r2, r3\n"
+                self.output_string += "\t\tpush r2\n"
             else:
                 sys.stderr.write("error: invalid operator")
         elif isinstance(ast, VariableNode):
@@ -82,71 +116,28 @@ class CodeGenerator:
             if ast._next is not None:
                 ast._next.cg_visit(self)
         elif isinstance(ast, WriteNode):
-            self.code_generator()
+            self.code_generator(ast.expression)
+            self.cgwrite("pop r2")
+            self.cgwrite("ldr r2, [r2]")
+            self.cgwrite("push r2")
+            self.cgwrite("pop r2")
+            self.cgwrite("ldr r0, format")
+            self.cgwrite("mov r1, r2")
+            self.cgwrite("bl printf")
             if ast._next is not None:
                 ast._next.cg_visit(self)
         elif isinstance(ast, RepeatNode):
-            flag = 0
-            while not flag:
-                self.interpret(ast.instructions, environment)
-                self.interpret(ast.condition, environment)
-                flag = self.stack.pop()
-                if ast._next is not None:
-                    ast._next.int_visit(self, self.environment)
+            # unfinished
+            if ast._next is not None:
+                ast._next.cg_visit(self)
         elif isinstance(ast, ConditionNode):
-            self.interpret(ast.exp_left, environment)
-            self.interpret(ast.exp_right, environment)
-            relation = ast.relation
-            left = self.stack.pop()
-            right = self.stack.pop()
-            if relation == "<":
-                if left < right:
-                    self.stack.append(1)
-                else:
-                    self.stack.append(0)
-            elif relation == ">":
-                if left > right:
-                    self.stack.append(1)
-                else:
-                    self.stack.append(0)
-            elif relation == "<=":
-                if left <= right:
-                    self.stack.append(1)
-                else:
-                    self.stack.append(0)
-            elif relation == ">=":
-                if left >= right:
-                    self.stack.append(1)
-                else:
-                    self.stack.append(0)
-            elif relation == "=":
-                if left == right:
-                    self.stack.append(1)
-                else:
-                    self.stack.append(0)
-            elif relation == "#":
-                if not left == right:
-                    self.stack.append(1)
-                else:
-                    self.stack.append(0)
-            else:
-                sys.stderr.write("error: invalid condition\n")
-                exit(1)
+            # unfinished
+            pass
         elif isinstance(ast, FieldNode):
-            self.interpret(ast.location, environment)
-            #self.interpret(ast.variable, environment)
-            #field = self.stack.pop()
-            record = self.stack.pop()
-            val = record.get_field(ast.variable.variable_name)
-            self.stack.append(val)
+            # unfinished
+            pass
         elif isinstance(ast, IndexNode):
-            self.interpret(ast.location, environment)
-            self.interpret(ast.expression, environment)
-            index = self.stack.pop()
-            #print type(index)
-            #if not isinstance(index, IntegerBox):
-            #    sys.stderr.write("error: accessing array with noninteger index")
-            arr = self.stack.pop()
-            self.stack.append(arr.index(index))
+            # unfinished
+            pass
         else:
             pass
