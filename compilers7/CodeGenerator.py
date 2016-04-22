@@ -239,7 +239,23 @@ class CodeGenerator:
             # unfinished
             pass
         elif isinstance(ast, IndexNode):
-
-            pass
+            self.code_generator(ast.location)
+            s = self.code_generator(ast.expression)
+            if s == "location":
+                self.cgwrite("pop {r2}")
+                self.cgwrite("ldr r2, [r2]")
+                self.cgwrite("push {r2}") #index in simple
+            self.cgwrite("ldr r3, ={0}".format(
+                    self.scope.find(ast.location.variable_name)._type.unit_size))
+            #self.cgwrite("@{0}".format(
+            #       self.scope.find(ast.location.variable_name)._type.unit_size))
+            self.cgwrite("pop {r2}")
+            self.cgwrite("mul r2, r2, r3")
+            self.cgwrite("push {r2}")
+            self.cgwrite("pop {r3}")
+            self.cgwrite("pop {r2}")
+            self.cgwrite("add r2, r2, r3")
+            self.cgwrite("push {r2}")
+            return "location"
         else:
             pass

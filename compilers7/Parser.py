@@ -749,8 +749,8 @@ def main():
     #f = open("../compilers5/test5.txt")
     #f = open("../compilers5/test6.txt")
     #f = open("test.txt")
-    #f = open("test2.txt")
-    f = open("./test/test.txt") # 20 23 45
+    f = open("test5.txt")
+    #f = open("./test/test.txt") # 20 23 45
     input_string = ""
     for line in f:
         input_string += line
