@@ -23,8 +23,8 @@ class CodeGenerator:
         self.output_string = "" # assembly code
         self.ast = ast # ast to parse
         self.filename = filename # filename to write to
-        self.num_loops = 1
-        self.num_if = 1
+        self.num_loops = 1 # loop name counter
+        self.num_if = 1 # if name counter
 
     # ARM headers, unfinished
     def start(self):
@@ -150,16 +150,25 @@ class CodeGenerator:
                 ast._next.cg_visit(self)
             return "t"
         elif isinstance(ast, IfNode):
-            self.output_string += "itrue{0}:\n".format(self.num_if)
-            self.code_generator(ast.instructions_true)
-            self.output_string += "ifalse{0}:\n".format(self.num_if)
-            self.code_generator(ast.instructions_false)
-            self.num_if += 1
             self.code_generator(ast.condition)
             self.cgwrite("pop {r2}")
             self.cgwrite("cmp r2, #1")
+            self.cgwrite("beq itrue{0}".format(self.num_if))
+            self.cgwrite("bne ifalse{0}".format(self.num_if))
+            ###
+            self.output_string += "itrue{0}:\n".format(self.num_if)
+            self.code_generator(ast.instructions_true)
+            self.cgwrite("bl endif{0}".format(self.num_if))
+            self.output_string += "ifalse{0}:\n".format(self.num_if)
+            self.code_generator(ast.instructions_false)
+            self.cgwrite("bl endif{0}".format(self.num_if))
+            self.output_string += "endif{0}:\n".format(self.num_if)
+            self.num_if += 1
+            '''self.code_generator(ast.condition)
+            self.cgwrite("pop {r2}")
+            self.cgwrite("cmp r2, #1")
             self.cgwrite("beq itrue{0}".format(self.num_if - 1))
-            self.cgwrite("bne ifalse{0}".format(self.num_if - 1))
+            self.cgwrite("bne ifalse{0}".format(self.num_if - 1))'''
             # self.code_generator(ast.instructions_true)
             if ast._next is not None:
                 ast._next.cg_visit(self)
