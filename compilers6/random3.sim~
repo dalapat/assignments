@@ -1,0 +1,27 @@
+(* $Id: random.sim 30 2006-02-17 17:39:34Z phf $ *)
+
+PROGRAM Random;
+CONST
+  a = 16807;
+  m = 2147483647;
+  q = m DIV a;
+  r = m MOD a;
+VAR
+  Z: INTEGER; (* seed *)
+  g: INTEGER; (* temporary *)
+  i: INTEGER;
+BEGIN
+  Z := 1;
+  (* Forever... *)
+  i := 0;
+  REPEAT 
+    i := i + 1;
+    WRITE i
+  UNTIL i > 10 END
+END Random.
+
+(*
+  This is an integer version of the random number generator
+  described in Wirth, Reiser: Programming in Oberon, 1992.
+  I guess the original reference is Park and Miller, 1988.
+*)

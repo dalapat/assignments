@@ -1,0 +1,22 @@
+PROGRAM X;
+
+TYPE 
+  t = ARRAY 3 OF INTEGER;    
+  T = RECORD x, y: t; END;
+
+CONST y = 2;
+      
+VAR a: ARRAY 3 OF T;
+VAR b: INTEGER;
+VAR c: INTEGER;
+  
+BEGIN
+  a[2].x[2] := 20;
+  a[2].y := a[2].x;
+  WRITE a[2].y[2];
+  b := a[2].x[2] + y;
+  READ a[2].x[1];
+  c := b + a[2].x[1];
+  WRITE c
+
+END X.

@@ -1,0 +1,15 @@
+Anish Dalal
+adalal1@jhu.edu
+Assignment 4
+Compilers and Interpreters
+
+Python 2.7
+
+Comments:
+
+I was unable to properly make the graphical output. 
+
+I know that Entry and Type could hold the overrideable functions for their
+subclasses. I chose not to use these for this assignment as it was easier 
+to implement. 
+

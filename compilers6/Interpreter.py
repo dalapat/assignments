@@ -10,126 +10,176 @@ from RepeatNode import RepeatNode
 from ConditionNode import ConditionNode
 from FieldNode import FieldNode
 from IndexNode import IndexNode
+from IntegerBox import IntegerBox
 
+'''
+Runs over AST and interprets Simple Programs
+'''
 class Interpreter:
 
-    def __init__(self):
-        pass
+    # initializes an interpreter
+    def __init__(self, ast, environment):
+        self.stack = [] # explicit stack for interpreter
+        self.ast = ast # ast to be traversed
+        self.environment = environment # maps variables to storage space
 
-    def interpret(self, ast, environment, stack):
+    # method to start parsing ast
+    def start(self):
+        self.interpret(self.ast, self.environment)
+
+    # follows visitor pattern to interpret AST
+    def interpret(self, ast, environment):
         if isinstance(ast, NumberNode):
-            stack.append(ast.constant.value)
+            self.stack.append(ast.constant.value)
         elif isinstance(ast, BinaryNode):
-            self.interpret(ast.exp_left, environment, stack)
-            self.interpret(ast.exp_right, environment, stack)
-            first = stack.pop()
-            second = stack.pop()
+            self.interpret(ast.exp_left, environment)
+            self.interpret(ast.exp_right, environment)
+            second = self.stack.pop()
+            first = self.stack.pop()
+            first_val = first
+            second_val = second
+            if isinstance(first, IntegerBox):
+                first_val = first.get()
+            if isinstance(second, IntegerBox):
+                second_val = second.get()
             if ast.operator == "+":
-                stack.append(first + second)
+                self.stack.append(first_val + second_val)
             elif ast.operator == "-":
-                stack.append(first - second)
+                self.stack.append(first_val - second_val)
             elif ast.operator == "*":
-                stack.append(first - second)
+                self.stack.append(first_val - second_val)
             elif ast.operator == "DIV":
                 if second == 0:
                     sys.stderr.write("error: division by 0")
                     exit(1)
-                stack.append(first / second)
+                self.stack.append(first_val / second_val)
             elif ast.operator == "MOD":
                 if second == 0:
                     sys.stderr.write("error: division by 0")
                     exit(1)
-                stack.append(first % second)
+                if isinstance(first_val, IntegerBox):
+                    print first_val.get()
+                self.stack.append(first_val % second_val)
             else:
                 sys.stderr.write("error: invalid operator")
         elif isinstance(ast, VariableNode):
-            stack.append(environment[ast.variable_name])
+            try:
+                self.stack.append(environment[ast.variable_name])
+            except:
+                sys.stderr.write("error: did not find var name: " + ast.variable_name)
+                exit(1)
         elif isinstance(ast, AssignNode):
-            self.interpret(ast.location, environment, stack)
-            self.interpret(ast.expression, environment, stack)
-            exp = stack.pop()
-            loc = stack.pop()
+            self.interpret(ast.location, environment)
+            self.interpret(ast.expression, environment)
+            exp = self.stack.pop()
+            loc = self.stack.pop()
+            if isinstance(exp, IntegerBox):
+                exp = exp.get()
             loc.set(exp)
+            if ast._next is not None:
+                ast._next.int_visit(self, self.environment)
         elif isinstance(ast, IfNode):
-            self.interpret(ast.condition, environment, stack)
-            condition_result = stack.pop()
-            if condition_result == "TRUE":
-                self.interpret(ast.instructions_true, environment, stack)
-            elif condition_result == "FALSE":
-                self.interpret(ast.instructions_false, environment, stack)
+            self.interpret(ast.condition, environment)
+            condition_result = self.stack.pop()
+            if condition_result == 1:
+                self.interpret(ast.instructions_true, environment)
+            elif condition_result == 0:
+                self.interpret(ast.instructions_false, environment)
+            if ast._next is not None:
+                ast._next.int_visit(self, self.environment)
         elif isinstance(ast, ReadNode):
-            self.interpret(ast.location, environment, stack)
-            loc = stack.pop()
-            #input = sys.stdin.read()
-            input = "16"
+            self.interpret(ast.location, environment)
+            loc = self.stack.pop()
+            input = sys.stdin.read()
+            #input = "16"
             try:
                 num = int(input)
             except:
                 sys.stderr.write("error: not an integer")
             loc.set(num)
+            if ast._next is not None:
+                ast._next.int_visit(self, self.environment)
             #stack.append(loc)
         elif isinstance(ast, WriteNode):
-            self.interpret(ast.expression, environment, stack)
-            exp = stack.pop()
-            sys.stdout.write(str(exp) + '\n')
+            self.interpret(ast.expression, environment)
+            exp = self.stack.pop()
+            output = ""
+            if isinstance(exp, IntegerBox):
+                output = str(exp.get())
+            elif isinstance(exp, int):
+                output = str(exp)
+            sys.stdout.write(output + '\n')
+            if ast._next is not None:
+                ast._next.int_visit(self, self.environment)
         elif isinstance(ast, RepeatNode):
-            flag = "FALSE"
+            flag = 0
             while not flag:
-                self.interpret(ast.instructions, environment, stack)
-                self.interpret(ast.condition, environment, stack)
-                flag = stack.pop()
+                self.interpret(ast.instructions, environment)
+                self.interpret(ast.condition, environment)
+                flag = self.stack.pop()
+                if ast._next is not None:
+                    ast._next.int_visit(self, self.environment)
         elif isinstance(ast, ConditionNode):
-            self.interpret(ast.exp_left, environment, stack)
-            self.interpret(ast.exp_right, environment, stack)
+            self.interpret(ast.exp_left, environment)
+            self.interpret(ast.exp_right, environment)
             relation = ast.relation
-            left = stack.pop()
-            right = stack.pop()
+            #left = self.stack.pop()
+            #right = self.stack.pop()
+            right = self.stack.pop()
+            left = self.stack.pop()
+            if isinstance(left, IntegerBox):
+                left = left.get()
+            if isinstance(right, IntegerBox):
+                right = right.get()
             if relation == "<":
                 if left < right:
-                    stack.append("TRUE")
+                    self.stack.append(1)
                 else:
-                    stack.append("FALSE")
+                    self.stack.append(0)
             elif relation == ">":
                 if left > right:
-                    stack.append("TRUE")
+                    self.stack.append(1)
                 else:
-                    stack.append("FALSE")
+                    self.stack.append(0)
             elif relation == "<=":
                 if left <= right:
-                    stack.append("TRUE")
+                    self.stack.append(1)
                 else:
-                    stack.append("FALSE")
+                    self.stack.append(0)
             elif relation == ">=":
                 if left >= right:
-                    stack.append("TRUE")
+                    self.stack.append(1)
                 else:
-                    stack.append("FALSE")
+                    self.stack.append(0)
             elif relation == "=":
                 if left == right:
-                    stack.append("TRUE")
+                    self.stack.append(1)
                 else:
-                    stack.append("FALSE")
+                    self.stack.append(0)
             elif relation == "#":
                 if not left == right:
-                    stack.append("TRUE")
+                    self.stack.append(1)
                 else:
-                    stack.append("FALSE")
+                    self.stack.append(0)
             else:
-                sys.stderr.write("error: invalid condition")
+                sys.stderr.write("error: invalid condition\n")
+                exit(1)
         elif isinstance(ast, FieldNode):
-            self.interpret(ast.location, environment, stack)
-            self.interpret(ast.variable, environment, stack)
-            field = stack.pop()
-            record = stack.pop()
-            stack.append(record.get_field(field))
+            self.interpret(ast.location, environment)
+            # changed: commented 2 lines below
+            #self.interpret(ast.variable, environment)
+            #field = self.stack.pop()
+            record = self.stack.pop()
+            val = record.get_field(ast.variable.variable_name)
+            self.stack.append(val)
         elif isinstance(ast, IndexNode):
-            self.interpret(ast.location, environment, stack)
-            self.interpret(ast.expression, environment, stack)
-            index = stack.pop()
+            self.interpret(ast.location, environment)
+            self.interpret(ast.expression, environment)
+            index = self.stack.pop()
             #print type(index)
             #if not isinstance(index, IntegerBox):
             #    sys.stderr.write("error: accessing array with noninteger index")
-            arr = stack.pop()
-            stack.append(arr.index(index))
+            arr = self.stack.pop()
+            self.stack.append(arr.index(index))
         else:
             pass

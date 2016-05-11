@@ -1,0 +1,6 @@
+Anish Dalal
+adalal1@jhu.edu
+Assignment 8
+Compilers and Interpreters
+
+I fixed a lot of my issues with my code generator. Aside from field nodes and a a small bug with if nodes the code generator much better than before now. I attempted to optimize the code generator by following option b but I realized that without getting my code generator in a better functioning state I would not be able to proceed with the assignment. 

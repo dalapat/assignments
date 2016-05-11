@@ -1,0 +1,11 @@
+digraph X {
+subgraph cluster_1 {
+L0 [label="X",shape=box,color=white,fontcolor=black]
+subgraph cluster_1 {
+L1 [label="a",shape=box,color=white,fontcolor=black]
+L2 [label="b",shape=box,color=white,fontcolor=black]
+}
+L3 [label="a",shape=box,color=white,fontcolor=black]
+L4 [label="i",shape=box,color=white,fontcolor=black]
+}
+}

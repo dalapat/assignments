@@ -1,0 +1,6 @@
+PROGRAM X;
+  VAR a: INTEGER;
+BEGIN
+  READ a;
+  WRITE a 
+END X.

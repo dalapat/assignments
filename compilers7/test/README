@@ -1,0 +1,10 @@
+Anish Dalal
+adalal1@jhu.edu
+Assignment 7
+Compilers and Interpreters
+
+Although the setup and code generation functions are in the code and are accurate in terms of their method of parsing, I am having trouble with the assembly code. In other words, my method of parsing the ast in CodeGenerator.py is correct, but I do not know ARM assembly and for some of the possible nodes that can be encountered in the AST I am not sure what assembly code should be written. I have simply made a comment about that in CodeGeneration.py code_generator() and continued parsing the AST from those nodes. 
+
+Additionally, I was unsure about what headers and assembly directives should be added. I made a best guess based on what I read from the example assembly files Peter posted but I think many things are missing from them. 
+
+However, I am confident in saying that the problems with this assignment lie solely with the assembly code aspect of it. In other words, the traversal of the AST is correct, the proper offsets are allocated to variables, and some properly formatted assembly code is produced. I am confident that if I fill in the right assembly code for the missing AST nodes, the assignment would be 100% correct. 

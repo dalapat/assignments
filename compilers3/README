@@ -1,0 +1,19 @@
+Anish Dalal
+adalal1@jhu.edu
+Compilers
+Assignment 3
+02/24
+
+Notes:
+
+If an error occurs either in the scanner or parser, the error will output and the 
+program will stop
+
+All informational statements go to stdout and and all errors go to stderr
+
+I changed my Token to have a kind map so that each relevant operator or keyword
+has its own kind. 
+
+I know that Observer has more functions than necessary and that this is a design flaw.
+In the future I will most likely just make a function to print the token, a token
+to print the begin nonterminal, and an end function.

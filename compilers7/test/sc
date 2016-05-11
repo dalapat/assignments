@@ -1,0 +1,226 @@
+#!/usr/bin/env python2.7
+from Scanner import Scanner
+from Parser import Parser
+from Observer import Observer
+from Visitor import Visitor
+from ASTvisitor import ASTvisitor
+from DotObserver import DotObserver
+from DotVisitor import DotVisitor
+import sys
+import os
+
+# driver program for the scanner. user interacts with this class
+def main():
+    # error check the number of arguments passed
+    num_args = len(sys.argv)-1
+    try:
+        if num_args == 0:
+            input_line = sys.stdin.read()
+            s = Scanner(input_line)
+            token_list = s.all()
+            p = Parser(observer=Observer(), visitor = ASTvisitor(),
+                           token_list=token_list, print_symbol_table=4)
+            p.parse()
+        if num_args > 3:
+            # only expecting -s and filename for this project, so 3 additional arguments is too much
+            sys.stderr.write("\nerror: too many arguments\n")
+
+        # only relevant option for this project is s, so all other
+        # options that will become relevant later will produce
+        # an error currently
+        if not sys.argv[1][0] == "-":
+            if os.path.isfile(sys.argv[1]):
+                f = open(sys.argv[1], 'r')
+                input_line = ""
+                for line in f:
+                    input_line += line
+                s = Scanner(input_line)
+                token_list = s.all()
+                f.close()
+                file_name = os.path.basename(sys.argv[1]).split(".")[0]
+                p = Parser(token_list = token_list, print_symbol_table=5,
+                           visitor=ASTvisitor(), filename=file_name)
+                p.parse()
+            else:
+                sys.stderr.write("\nerror: file \"{0}\" not found\n".format(sys.argv[2]))
+        elif sys.argv[1][1] == 's':
+            # test scanner
+            if num_args == 1:
+                # read from standard input
+                input_string = sys.stdin.read()
+                s = Scanner(input_string)
+                token_list = s.all()
+                for token in token_list:
+                    sys.stdout.write(str(token) + '\n')
+            elif num_args == 2:
+                # read from file
+                if os.path.isfile(sys.argv[2]):
+                    f = open(sys.argv[2], 'r')
+                    input_line = ""
+                    for line in f:
+                        input_line += line
+                    s = Scanner(input_line)
+                    token_list = s.all() # doesn't stop if there's an error
+                    for token in token_list:
+                        sys.stdout.write(str(token) + '\n')
+                    f.close()
+                else:
+                    sys.stderr.write("\nerror: file \"{0}\" not found\n".format(sys.argv[2]))
+        elif sys.argv[1][1] == 'c':
+            if num_args == 1:
+                # read from standard input
+                input_string = sys.stdin.read()
+                s = Scanner(input_string)
+                token_list = s.all()
+                p = Parser(observer = Observer(), token_list = token_list)
+                p.parse()
+            elif num_args == 2:
+                # read from file
+                if sys.argv[2] == "-g":
+                    input_string = sys.stdin.read()
+                    s = Scanner(input_string)
+                    token_list = s.all()
+                    p = Parser(observer = DotObserver(), token_list = token_list)
+                    p.parse()
+                elif os.path.isfile(sys.argv[2]):
+                    f = open(sys.argv[2], 'r')
+                    input_line = ""
+                    for line in f:
+                        input_line += line
+                    s = Scanner(input_line)
+                    token_list = s.all()
+                    f.close()
+                    p = Parser(observer = Observer(), token_list = token_list)
+                    p.parse()
+                else:
+                    sys.stderr.write("\nerror: file \"{0}\" not found\n".format(sys.argv[2]))
+            elif num_args == 3:
+                # read from file and produce graphical output
+                if os.path.isfile(sys.argv[3]):
+                    f = open(sys.argv[3], 'r')
+                    input_line = ""
+                    for line in f:
+                        input_line += line
+                    s = Scanner(input_line)
+                    token_list = s.all()
+                    f.close()
+                    if sys.argv[2] == "-g":
+                        p = Parser(observer = DotObserver(), token_list = token_list)
+                        p.parse()
+                    else:
+                        # p = Parser(observer = Observer(), token_list = token_list)
+                        sys.stderr.write("error: invalid argument\n")
+                    # p.parse()
+                else:
+                    sys.stderr.write("\nerror: file \"{0}\" not found\n".format(sys.argv[2]))
+
+        elif sys.argv[1][1] == 't':
+            if num_args == 1:
+                # stdin
+                input_line = sys.stdin.read()
+                s = Scanner(input_line)
+                token_list = s.all()
+                p = Parser(observer=Observer(), token_list=token_list, print_symbol_table=1)
+                p.parse()
+            elif num_args == 2:
+                # read from file
+                if sys.argv[2] == "-g":
+                    input_line = sys.stdin.read()
+                    s = Scanner(input_line)
+                    token_list = s.all()
+                    p = Parser(token_list=token_list, print_symbol_table=1, visitor=DotVisitor())
+                if os.path.isfile(sys.argv[2]):
+                    f = open(sys.argv[2], 'r')
+                    input_line = ""
+                    for line in f:
+                        input_line += line
+                    s = Scanner(input_line)
+                    token_list = s.all()
+                    f.close()
+                    p = Parser(token_list = token_list, print_symbol_table=1, visitor=Visitor())
+                    p.parse()
+                else:
+                    sys.stderr.write("\nerror: file \"{0}\" not found\n".format(sys.argv[2]))
+            elif num_args == 3:
+                if os.path.isfile(sys.argv[3]):
+                    f = open(sys.argv[3], 'r')
+                    input_line = ""
+                    for line in f:
+                        input_line += line
+                    s = Scanner(input_line)
+                    token_list = s.all()
+                    f.close()
+                    p = Parser(token_list = token_list, print_symbol_table=1, visitor=DotVisitor())
+                    p.parse()
+                else:
+                    sys.stderr.write("\nerror: file \"{0}\" not found\n".format(sys.argv[3]))
+        elif sys.argv[1][1] == 'a':
+            if num_args == 1:
+                # stdin
+                input_line = sys.stdin.read()
+                s = Scanner(input_line)
+                token_list = s.all()
+                p = Parser(observer=Observer(), visitor = ASTvisitor(),
+                           token_list=token_list, print_symbol_table=2)
+                p.parse()
+            elif num_args == 2:
+                # read from file
+                if sys.argv[2] == "-g":
+                    input_line = sys.stdin.read()
+                    s = Scanner(input_line)
+                    token_list = s.all()
+                    p = Parser(token_list=token_list, print_symbol_table=2, visitor=DotVisitor())
+                if os.path.isfile(sys.argv[2]):
+                    f = open(sys.argv[2], 'r')
+                    input_line = ""
+                    for line in f:
+                        input_line += line
+                    s = Scanner(input_line)
+                    token_list = s.all()
+                    f.close()
+                    p = Parser(token_list = token_list, print_symbol_table=2, visitor=ASTvisitor())
+                    p.parse()
+                else:
+                    sys.stderr.write("\nerror: file \"{0}\" not found\n".format(sys.argv[2]))
+            elif num_args == 3:
+                if os.path.isfile(sys.argv[3]):
+                    f = open(sys.argv[3], 'r')
+                    input_line = ""
+                    for line in f:
+                        input_line += line
+                    s = Scanner(input_line)
+                    token_list = s.all()
+                    f.close()
+                    p = Parser(token_list = token_list, print_symbol_table=2, visitor=DotVisitor())
+                    p.parse()
+                else:
+                    sys.stderr.write("\nerror: file \"{0}\" not found\n".format(sys.argv[3]))
+        elif sys.argv[1][1] == 'i':
+            if num_args == 1:
+                # stdin
+                input_line = sys.stdin.read()
+                s = Scanner(input_line)
+                token_list = s.all()
+                p = Parser(observer=Observer(), visitor = ASTvisitor(),
+                           token_list=token_list, print_symbol_table=3)
+                p.parse()
+            elif num_args == 2:
+                if os.path.isfile(sys.argv[2]):
+                    f = open(sys.argv[2], 'r')
+                    input_line = ""
+                    for line in f:
+                        input_line += line
+                    s = Scanner(input_line)
+                    token_list = s.all()
+                    f.close()
+                    p = Parser(token_list = token_list, print_symbol_table=3, visitor=ASTvisitor())
+                    p.parse()
+                else:
+                    sys.stderr.write("\nerror: file \"{0}\" not found\n".format(sys.argv[2]))
+        else:
+            sys.stderr.write("\nerror: invalid option\n")
+
+    except Exception as e:
+        pass
+
+main()

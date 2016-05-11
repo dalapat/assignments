@@ -24,9 +24,11 @@ from ReadNode import ReadNode
 from IntegerBox import IntegerBox
 from ArrayBox import ArrayBox
 from RecordBox import RecordBox
+from Interpreter import Interpreter
 
 from Visitor import Visitor
 from ASTvisitor import ASTvisitor
+from InterpreterVisitor import InterpreterVisitor
 import sys
 
 
@@ -72,135 +74,15 @@ class Parser:
             elif self.print_symbol_table == 3:
                 environment = self.program_scope.make_environment()
                 stack = []
-                curr = instructions
-                while curr is not None:
-                    self.interpret(curr, environment, stack)
-                    curr = curr._next
-
-    def interpret(self, ast, environment, stack):
-        if isinstance(ast, NumberNode):
-            stack.append(ast.constant.value)
-        elif isinstance(ast, BinaryNode):
-            self.interpret(ast.exp_left, environment, stack)
-            self.interpret(ast.exp_right, environment, stack)
-            first = stack.pop()
-            second = stack.pop()
-            if ast.operator == "+":
-                stack.append(first + second)
-            elif ast.operator == "-":
-                stack.append(first - second)
-            elif ast.operator == "*":
-                stack.append(first - second)
-            elif ast.operator == "DIV":
-                if second == 0:
-                    sys.stderr.write("error: division by 0")
-                    exit(1)
-                stack.append(first / second)
-            elif ast.operator == "MOD":
-                if second == 0:
-                    sys.stderr.write("error: division by 0")
-                    exit(1)
-                stack.append(first % second)
-            else:
-                sys.stderr.write("error: invalid operator")
-        elif isinstance(ast, VariableNode):
-            stack.append(environment[ast.variable_name])
-        elif isinstance(ast, AssignNode):
-            self.interpret(ast.location, environment, stack)
-            self.interpret(ast.expression, environment, stack)
-            exp = stack.pop()
-            loc = stack.pop()
-            loc.set(exp)
-        elif isinstance(ast, IfNode):
-            self.interpret(ast.condition, environment, stack)
-            condition_result = stack.pop()
-            if condition_result == "TRUE":
-                self.interpret(ast.instructions_true, environment, stack)
-            elif condition_result == "FALSE":
-                self.interpret(ast.instructions_false, environment, stack)
-        elif isinstance(ast, ReadNode):
-            self.interpret(ast.location, environment, stack)
-            loc = stack.pop()
-            input = sys.stdin.read()
-            #input = "16"
-            try:
-                num = int(input)
-            except:
-                sys.stderr.write("error: not an integer")
-            loc.set(num)
-            #stack.append(loc)
-        elif isinstance(ast, WriteNode):
-            self.interpret(ast.expression, environment, stack)
-            exp = stack.pop()
-            output = ""
-            if isinstance(exp, IntegerBox):
-                output = str(exp.get())
-            elif isinstance(exp, int):
-                output = str(exp)
-            else:
-                sys.stderr.write("error: unexpected")
-            sys.stdout.write(output + '\n')
-        elif isinstance(ast, RepeatNode):
-            flag = "FALSE"
-            while not flag:
-                self.interpret(ast.instructions, environment, stack)
-                self.interpret(ast.condition, environment, stack)
-                flag = stack.pop()
-        elif isinstance(ast, ConditionNode):
-            self.interpret(ast.exp_left, environment, stack)
-            self.interpret(ast.exp_right, environment, stack)
-            relation = ast.relation
-            left = stack.pop()
-            right = stack.pop()
-            if relation == "<":
-                if left < right:
-                    stack.append("TRUE")
-                else:
-                    stack.append("FALSE")
-            elif relation == ">":
-                if left > right:
-                    stack.append("TRUE")
-                else:
-                    stack.append("FALSE")
-            elif relation == "<=":
-                if left <= right:
-                    stack.append("TRUE")
-                else:
-                    stack.append("FALSE")
-            elif relation == ">=":
-                if left >= right:
-                    stack.append("TRUE")
-                else:
-                    stack.append("FALSE")
-            elif relation == "=":
-                if left == right:
-                    stack.append("TRUE")
-                else:
-                    stack.append("FALSE")
-            elif relation == "#":
-                if not left == right:
-                    stack.append("TRUE")
-                else:
-                    stack.append("FALSE")
-            else:
-                sys.stderr.write("error: invalid condition")
-        elif isinstance(ast, FieldNode):
-            self.interpret(ast.location, environment, stack)
-            self.interpret(ast.variable, environment, stack)
-            field = stack.pop()
-            record = stack.pop()
-            stack.append(record.get_field(field))
-        elif isinstance(ast, IndexNode):
-            self.interpret(ast.location, environment, stack)
-            self.interpret(ast.expression, environment, stack)
-            index = stack.pop()
-            #print type(index)
-            #if not isinstance(index, IntegerBox):
-            #    sys.stderr.write("error: accessing array with noninteger index")
-            arr = stack.pop()
-            stack.append(arr.index(index))
-        else:
-            pass
+                currinstruction = instructions
+                #while curr is not None:
+                #    self.interpret(curr, environment, stack)
+                #    curr = curr._next
+                #v = InterpreterVisitor(environment)
+                #v.start()
+                #currinstruction.int_visit(v)
+                v = Interpreter(currinstruction, environment)
+                v.start()
 
     # check if the currently parsed token is a token we are
     # expecting to find
@@ -275,11 +157,13 @@ class Parser:
             if self.program_scope.local(name):
                 self.total_error_flag = 1
                 sys.stderr.write("error: attempted to redefine identifier\n")
+                exit(1)
             self.match("=")
             e = self._expression()
             if not isinstance(e, NumberNode):
                 self.total_error_flag = 1
                 sys.stderr.write("error: constdecl received nonconst exp\n")
+                exit(1)
                 # exit(1)
             self.match(";")
             #return_obj = e
@@ -289,6 +173,7 @@ class Parser:
             else:
                 self.total_error_flag = 1
                 sys.stderr.write("error: attempted to define const with nonconst object\n")
+                exit(1)
         self.observer.end_constdecl()
         # return return_obj
 
@@ -314,6 +199,7 @@ class Parser:
             else:
                 self.total_error_flag = 1
                 sys.stderr.write("error: attempting to redefine variable\n")
+                exit(1)
         self.observer.end_typedecl()
         # return return_type
 
@@ -341,6 +227,7 @@ class Parser:
                 else:
                     self.total_error_flag = 1
                     sys.stderr.write("error: attempting to redefine var\n")
+                    exit(1)
         self.observer.end_vardecl()
         return return_type
 
@@ -444,6 +331,7 @@ class Parser:
             else:
                 self.total_error_flag = 1
                 sys.stderr.write("error: expecting \'+\' or \'-\'\n")
+                exit(1)
             subtree_right = self._term()
             if isinstance(subtree, NumberNode) and isinstance(subtree_right, NumberNode):
                 result = 0
@@ -556,6 +444,7 @@ class Parser:
         else:
             self.total_error_flag = 1
             sys.stdout.error("error: expecting integer, identifier or \'(\'\n")
+            exit(1)
         self.observer.end_factor()
         return node
 
@@ -593,9 +482,11 @@ class Parser:
             node = self._write()
         else:
             self.total_error_flag = 1
-            sys.stderr.write("error: not a valid instruction\n"
-                             "@({0}, {1})".format(self.token_list[self.current].start_position,
-                                                  self.token_list[self.current].end_position))
+            sys.stderr.write("error: not a valid instruction \"{0}\"\n"
+                             "@({1}, {2})".format(self.token_list[self.current].get_token_name(),
+                                                  self.token_list[self.current].start_position,
+                                                  self.token_list[self.current].end_position) + "\n")
+            exit(1)
         self.observer.end_instruction()
         return node
 
@@ -607,14 +498,15 @@ class Parser:
         subtree_left = self._designator()
         if not (isinstance(subtree_left, VariableNode) or isinstance(subtree_left, FieldNode)
                 or isinstance(subtree_left, IndexNode)):
-            print type(subtree_left)
             sys.stderr.write("error: assign")
+            exit(1)
         stl_type = subtree_left.type
         self.match(":=")
         subtree_right = self._expression()
         str_type = subtree_right.type
         if not type(stl_type) == type(str_type):
             sys.stderr.write("error: assigning things that don't have the same type\n")
+            exit(1)
         assign_node = AssignNode(None, subtree_left, subtree_right)
         self.observer.end_assign()
         return assign_node
@@ -706,6 +598,7 @@ class Parser:
             sys.stderr.write("error: not a valid condition\n"
                              "@({0}, {1})".format(self.token_list[self.current].start_position,
                                                   self.token_list[self.current].end_position))
+            exit(1)
         right = self._expression()
         self.observer.end_condition()
         condition_subtree = ConditionNode(left, right, relation)
@@ -768,6 +661,7 @@ class Parser:
             if self.token_list[self.current].kind == self.kind_map["["]:
                 if not isinstance(return_object.type, Array):
                     sys.stderr.write("error: not an array")
+                    exit(1)
                 self.match("[")
                 exp_list = self._expression_list()
                 self.match("]")
@@ -775,6 +669,7 @@ class Parser:
                 for e in exp_list:
                     if not isinstance(e.type, Integer):
                         sys.stderr.write("error: noninteger found in selector\n")
+                        exit(1)
                 index_type = return_object.type._type
                 # print "it", type(index_type)
                 # print "index type: ", type(index_type)
@@ -789,6 +684,7 @@ class Parser:
                 field_var_name = self.match("IDENTIFIER")
                 if not isinstance(return_object.type, Record):
                     sys.stderr.write("error: attempting to select field from non-record type\n")
+                    exit(1)
                 if(return_object.type.scope.local(field_var_name)):
                     field_var_obj = return_object.type.scope.find(field_var_name)
                 field_type = field_var_obj._type
@@ -840,7 +736,8 @@ def main():
     #f = open("../compilers5/test6.txt")
     #f = open("test.txt")
     #f = open("test2.txt")
-    f = open("test3.txt")
+    f = open("random3.sim")
+    #f = open("test4.txt") # 20 23 45
     input_string = ""
     for line in f:
         input_string += line

@@ -66,6 +66,12 @@ class Parser:
                 # while(currinstruction is not None):
                 currinstruction.visit(self.visitor)
                 # currinstruction = currinstruction._next
+            elif self.print_symbol_table == 3:
+                # build environment
+                pass
+
+    def build_environment(self):
+        pass
 
     # check if the currently parsed token is a token we are
     # expecting to find
@@ -236,17 +242,13 @@ class Parser:
             self.match("ARRAY")
             length = None
             e = self._expression()
-            # get length of array
-            # print "TYPE",
             if isinstance(e, NumberNode):
-                # should it be assigned to actual value or number node?
                 length = e.constant.value
             else:
                 self.total_error_flag = 1
                 sys.stderr.write("error: not a valid type for array length\n")
             self.match("OF")
             array_type = self._type()
-            # check if array_type is already defined
             if array_type is None:
                 self.total_error_flag = 1
                 sys.stderr.write("error: array type not found\n")
@@ -262,11 +264,11 @@ class Parser:
             while self.token_list[self.current].kind == self.kind_map["IDENTIFIER"]:
                 id_list = self._identifier_list()
                 self.match(":")
-                # type of current identifier(s)
                 record_field_type = self._type()
                 if record_field_type is None:
                     self.total_error_flag = 1
                     sys.stderr.write("error: record field type nonexistent\n")
+
                 self.match(";")
                 for name in id_list:
                     if not self.current_scope.local(name):
@@ -291,28 +293,8 @@ class Parser:
     # by following the Expression production
     def _expression(self):
         self.observer.begin_expression()
-        '''operation = -1
-        if self.token_list[self.current].kind == self.kind_map["+"]:
-            operation = self.match("+")
-        elif self.token_list[self.current].kind == self.kind_map["-"]:
-            operation = self.match("-")
-        subtree = self._term()
-
-        while (self.token_list[self.current].kind == self.kind_map["+"]) or \
-                (self.token_list[self.current].kind == self.kind_map["-"]):
-            if self.token_list[self.current].kind == self.kind_map["+"]:
-                self.match("+")
-            elif self.token_list[self.current].kind == self.kind_map["-"]:
-                self.match("-")
-            else:
-                self.total_error_flag = 1
-                sys.stderr.write("error: expecting \'+\' or \'-\'\n")
-            self._term()'''
         node = self.nexpression()
-        # node.to_string()
         self.observer.end_expression()
-        # e = Constant(self.universe.find("INTEGER"), 5)
-        # print "e", type(node)
         return node
 
     def nexpression(self):
@@ -323,8 +305,6 @@ class Parser:
             outer_operation = self.match("-")
         subtree = self._term()
         node = subtree
-        # if operation == '-':
-        #    bn = BinaryNode(operation, NumberNode(Constant(integerInstance, 0)), subtree)
         if (self.token_list[self.current].kind == self.kind_map["+"]) or \
                 (self.token_list[self.current].kind == self.kind_map["-"]):
             inner_operation = ""
@@ -377,36 +357,15 @@ class Parser:
                     num_node = NumberNode(c)
                     node = num_node
             elif isinstance(node, NumberNode):
-                # node.constant.value = -1*node.constant.value
                 c = Constant(integerInstance, 0 - node.constant.value)
                 num_node = NumberNode(c)
                 node = num_node
-            # bn = BinaryNode(outer_operation,
-                            #NumberNode(Constant(integerInstance, 0)), node)
-            # node = bn
         return node
 
     # set expectation of creating a Term
     # by following the Term production
     def _term(self):
         self.observer.begin_term()
-        '''operation = None
-        subtree_left = self._factor()
-        node = subtree_left
-        while (self.token_list[self.current].kind == self.kind_map["*"])or \
-            (self.token_list[self.current].kind == self.kind_map["DIV"]) or \
-            (self.token_list[self.current].kind == self.kind_map["MOD"]):
-            if self.token_list[self.current].kind == self.kind_map["*"]:
-                 operation = self.match("*")
-            elif self.token_list[self.current].kind == self.kind_map["DIV"]:
-                 operation = self.match("DIV")
-            elif self.token_list[self.current].kind == self.kind_map["MOD"]:
-                 operation = self.match("MOD")
-            else:
-                self.total_error_flag = 1
-                sys.stderr.out("error: expecting \'*\', \'DIV\', or \'MOD\'\n")
-            subtree_right =  self._factor()
-            temp = BinaryNode(operation, subtree_left, subtree_right)'''
         node = self.nterm()
         #return singular factor or binary node
         self.observer.end_term()
@@ -429,7 +388,6 @@ class Parser:
                 self.total_error_flag = 1
                 sys.stderr.out("error: expecting \'*\', \'DIV\', or \'MOD\'\n")
             sub_right = self.nterm()
-            # originally had constant, changed it to integer
             if isinstance(sub_left, NumberNode) and isinstance(sub_right, NumberNode):
                 result = 0
                 if operation == "*":
@@ -461,8 +419,6 @@ class Parser:
         elif self.token_list[self.current].kind == self.kind_map["IDENTIFIER"]:
             sub_tree = self._designator()
             node = sub_tree
-            #if not (isinstance(node, VariableNode) or isinstance(node, NumberNode)):
-            #    sys.stderr.write("error: designator in factor")
         elif self.token_list[self.current].kind == self.kind_map["("]:
             self.match("(")
             sub_tree = self._expression()
@@ -520,8 +476,6 @@ class Parser:
         # print "Assign"
         self.observer.begin_assign()
         subtree_left = self._designator()
-        # how do we check if its a variable?
-        # it could be a field
         if not (isinstance(subtree_left, VariableNode) or isinstance(subtree_left, FieldNode)
                 or isinstance(subtree_left, IndexNode)):
             print type(subtree_left)
@@ -637,7 +591,7 @@ class Parser:
         if not isinstance(expression.type, Integer):
             self.total_error_flag = 1
             sys.stderr.write("error: expression in write not of type integer")
-            #exit(1)
+            exit(1)
         self.observer.end_write()
         write_node = WriteNode(None, expression)
         return write_node
@@ -651,7 +605,7 @@ class Parser:
         if not isinstance(designator.type, Integer):
             self.total_error_flag = 1
             sys.stderr.write("error: designator in read not an integer")
-            #exit(1)
+            exit(1)
         self.observer.end_read()
         read_node = ReadNode(None, designator)
         return read_node
@@ -668,22 +622,9 @@ class Parser:
         elif isinstance(ret_obj, Constant):
             pass_obj = NumberNode(ret_obj)
         else:
+            self.total_error_flag = 1
             sys.stderr.write("error: variable name not pointing var or const\n")
-            # exit(1)
-        '''if isinstance(var_obj, Constant):
-            num_node = NumberNode(var_obj)
-            subtree = self._selector(num_node)
-            self.observer.end_designator()
-            return subtree'''
-        '''if isinstance(var_obj._type, Integer):
-            var_type = var_obj._type
-        elif isinstance(var_obj._type, Array):
-            var_type = var_obj._type._type
-        elif isinstance(var_obj._type, Record):
-            var_type = var_obj._type
-        else:
-            sys.stderr.write("error: designator\n")'''
-        #var_node = VariableNode(var_type, var_obj, var_name)
+            exit(1)
         subtree = self._selector(pass_obj)
         self.observer.end_designator()
         return subtree
@@ -701,8 +642,6 @@ class Parser:
                 self.match("[")
                 exp_list = self._expression_list()
                 self.match("]")
-                # check if it's an array
-                # if not isinstance(return_object.variable._type, Array):
                 node = return_object
                 for e in exp_list:
                     if not isinstance(e.type, Integer):
@@ -769,7 +708,7 @@ def main():
     #f = open("../compilers4/test2.txt")
     #f = open("../compilers4/test.txt")
     #f = open("test5.txt")
-    #f = open("test6.txt")
+    f = open("test4.txt")
     input_string = ""
     for line in f:
         input_string += line

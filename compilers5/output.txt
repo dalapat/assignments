@@ -1,0 +1,959 @@
+starting test
+test 1
+PROGRAM@(53, 59)
+identifier<Random>@(61, 66)
+;@(67, 67)
+CONST@(69, 73)
+identifier<a>@(77, 77)
+=@(79, 79)
+integer<16807>@(81, 85)
+;@(86, 86)
+identifier<m>@(90, 90)
+=@(92, 92)
+integer<2147483647>@(94, 103)
+;@(104, 104)
+identifier<q>@(108, 108)
+=@(110, 110)
+identifier<m>@(112, 112)
+DIV@(114, 116)
+identifier<a>@(118, 118)
+;@(119, 119)
+identifier<r>@(123, 123)
+=@(125, 125)
+identifier<m>@(127, 127)
+MOD@(129, 131)
+identifier<a>@(133, 133)
+;@(134, 134)
+VAR@(136, 138)
+identifier<Z>@(142, 142)
+:@(143, 143)
+identifier<INTEGER>@(145, 151)
+;@(152, 152)
+identifier<g>@(167, 167)
+:@(168, 168)
+identifier<INTEGER>@(170, 176)
+;@(177, 177)
+BEGIN@(195, 199)
+identifier<Z>@(203, 203)
+:=@(205, 206)
+integer<1>@(208, 208)
+;@(209, 209)
+WHILE@(232, 236)
+integer<0>@(238, 238)
+=@(240, 240)
+integer<0>@(242, 242)
+DO@(244, 245)
+identifier<g>@(291, 291)
+:=@(293, 294)
+identifier<a>@(296, 296)
+*@(297, 297)
+(@(298, 298)
+identifier<Z>@(299, 299)
+MOD@(301, 303)
+identifier<q>@(305, 305)
+)@(306, 306)
+-@(308, 308)
+identifier<r>@(310, 310)
+*@(311, 311)
+(@(312, 312)
+identifier<Z>@(313, 313)
+DIV@(315, 317)
+identifier<q>@(319, 319)
+)@(320, 320)
+;@(321, 321)
+IF@(327, 328)
+identifier<g>@(330, 330)
+>@(332, 332)
+integer<0>@(334, 334)
+THEN@(336, 339)
+identifier<Z>@(341, 341)
+:=@(343, 344)
+identifier<g>@(346, 346)
+ELSE@(348, 351)
+identifier<Z>@(353, 353)
+:=@(355, 356)
+identifier<g>@(358, 358)
++@(360, 360)
+identifier<m>@(362, 362)
+END@(364, 366)
+;@(367, 367)
+WRITE@(400, 404)
+identifier<Z>@(406, 406)
+END@(410, 412)
+END@(414, 416)
+identifier<Random>@(418, 423)
+.@(424, 424)
+eof@(611, 611)
+Program
+  PROGRAM@(53, 59)
+  identifier<Random>@(61, 66)
+  ;@(67, 67)
+  Declarations
+    ConstDecl
+      CONST@(69, 73)
+      identifier<a>@(77, 77)
+      =@(79, 79)
+      Expression
+        Term
+          Factor
+            integer<16807>@(81, 85)
+      ;@(86, 86)
+      identifier<m>@(90, 90)
+      =@(92, 92)
+      Expression
+        Term
+          Factor
+            integer<2147483647>@(94, 103)
+      ;@(104, 104)
+      identifier<q>@(108, 108)
+      =@(110, 110)
+      Expression
+        Term
+          Factor
+            Designator
+              identifier<m>@(112, 112)
+              Selector
+          DIV@(114, 116)
+          Factor
+            Designator
+              identifier<a>@(118, 118)
+              Selector
+      ;@(119, 119)
+      identifier<r>@(123, 123)
+      =@(125, 125)
+      Expression
+        Term
+          Factor
+            Designator
+              identifier<m>@(127, 127)
+              Selector
+          MOD@(129, 131)
+          Factor
+            Designator
+              identifier<a>@(133, 133)
+              Selector
+      ;@(134, 134)
+    VarDecl
+      VAR@(136, 138)
+      IdentifierList
+        identifier<Z>@(142, 142)
+      :@(143, 143)
+      Type
+        identifier<INTEGER>@(145, 151)
+      ;@(152, 152)
+      IdentifierList
+        identifier<g>@(167, 167)
+      :@(168, 168)
+      Type
+        identifier<INTEGER>@(170, 176)
+      ;@(177, 177)
+  BEGIN@(195, 199)
+  Instructions
+    Instruction
+      Assign
+        Designator
+          identifier<Z>@(203, 203)
+          Selector
+        :=@(205, 206)
+        Expression
+          Term
+            Factor
+              integer<1>@(208, 208)
+    ;@(209, 209)
+    Instruction
+      While
+        WHILE@(232, 236)
+        Condition
+          Expression
+            Term
+              Factor
+                integer<0>@(238, 238)
+          =@(240, 240)
+          Expression
+            Term
+              Factor
+                integer<0>@(242, 242)
+        DO@(244, 245)
+        Instructions
+          Instruction
+            Assign
+              Designator
+                identifier<g>@(291, 291)
+                Selector
+              :=@(293, 294)
+              Expression
+                Term
+                  Factor
+                    Designator
+                      identifier<a>@(296, 296)
+                      Selector
+                  *@(297, 297)
+                  Factor
+                    (@(298, 298)
+                    Expression
+                      Term
+                        Factor
+                          Designator
+                            identifier<Z>@(299, 299)
+                            Selector
+                        MOD@(301, 303)
+                        Factor
+                          Designator
+                            identifier<q>@(305, 305)
+                            Selector
+                    )@(306, 306)
+                -@(308, 308)
+                Term
+                  Factor
+                    Designator
+                      identifier<r>@(310, 310)
+                      Selector
+                  *@(311, 311)
+                  Factor
+                    (@(312, 312)
+                    Expression
+                      Term
+                        Factor
+                          Designator
+                            identifier<Z>@(313, 313)
+                            Selector
+                        DIV@(315, 317)
+                        Factor
+                          Designator
+                            identifier<q>@(319, 319)
+                            Selector
+                    )@(320, 320)
+          ;@(321, 321)
+          Instruction
+            If
+              IF@(327, 328)
+              Condition
+                Expression
+                  Term
+                    Factor
+                      Designator
+                        identifier<g>@(330, 330)
+                        Selector
+                >@(332, 332)
+                Expression
+                  Term
+                    Factor
+                      integer<0>@(334, 334)
+              THEN@(336, 339)
+              Instructions
+                Instruction
+                  Assign
+                    Designator
+                      identifier<Z>@(341, 341)
+                      Selector
+                    :=@(343, 344)
+                    Expression
+                      Term
+                        Factor
+                          Designator
+                            identifier<g>@(346, 346)
+                            Selector
+              ELSE@(348, 351)
+              Instructions
+                Instruction
+                  Assign
+                    Designator
+                      identifier<Z>@(353, 353)
+                      Selector
+                    :=@(355, 356)
+                    Expression
+                      Term
+                        Factor
+                          Designator
+                            identifier<g>@(358, 358)
+                            Selector
+                      +@(360, 360)
+                      Term
+                        Factor
+                          Designator
+                            identifier<m>@(362, 362)
+                            Selector
+              END@(364, 366)
+          ;@(367, 367)
+          Instruction
+            Write
+              WRITE@(400, 404)
+              Expression
+                Term
+                  Factor
+                    Designator
+                      identifier<Z>@(406, 406)
+                      Selector
+        END@(410, 412)
+  END@(414, 416)
+  identifier<Random>@(418, 423)
+  .@(424, 424)
+SCOPE BEGIN
+  Z =>
+    VAR BEGIN
+      type:
+        INTEGER
+    END VAR
+  a =>
+    CONST BEGIN
+      type:
+        INTEGER
+      value:
+        16807
+    END CONST
+  g =>
+    VAR BEGIN
+      type:
+        INTEGER
+    END VAR
+  m =>
+    CONST BEGIN
+      type:
+        INTEGER
+      value:
+        2147483647
+    END CONST
+  q =>
+    CONST BEGIN
+      type:
+        INTEGER
+      value:
+        127773
+    END CONST
+  r =>
+    CONST BEGIN
+      type:
+        INTEGER
+      value:
+        2836
+    END CONST
+END SCOPE
+instructions =>
+  Assign:
+  location =>
+    Variable:
+    variable =>
+      VAR BEGIN
+        type:
+          INTEGER
+      END VAR
+  expression =>
+    Number:
+    value =>
+      CONST BEGIN
+        type:
+          INTEGER
+        value:
+          1
+      END CONST
+  If:
+  condition =>
+    Condition (=):
+    left =>
+      Number:
+      value =>
+        CONST BEGIN
+          type:
+            INTEGER
+          value:
+            0
+        END CONST
+    right =>
+      Number:
+      value =>
+        CONST BEGIN
+          type:
+            INTEGER
+          value:
+            0
+        END CONST
+  true =>
+    Repeat:
+    condition =>
+      Condition (#):
+      left =>
+        Number:
+        value =>
+          CONST BEGIN
+            type:
+              INTEGER
+            value:
+              0
+          END CONST
+      right =>
+        Number:
+        value =>
+          CONST BEGIN
+            type:
+              INTEGER
+            value:
+              0
+          END CONST
+    instructions =>
+      Assign:
+      location =>
+        Variable:
+        variable =>
+          VAR BEGIN
+            type:
+              INTEGER
+          END VAR
+      expression =>
+        Binary (-):
+        left =>
+          Binary (*):
+          left =>
+            Number:
+            value =>
+              CONST BEGIN
+                type:
+                  INTEGER
+                value:
+                  16807
+              END CONST
+          right =>
+            Binary (MOD):
+            left =>
+              Variable:
+              variable =>
+                VAR BEGIN
+                  type:
+                    INTEGER
+                END VAR
+            right =>
+              Number:
+              value =>
+                CONST BEGIN
+                  type:
+                    INTEGER
+                  value:
+                    127773
+                END CONST
+        right =>
+          Binary (*):
+          left =>
+            Number:
+            value =>
+              CONST BEGIN
+                type:
+                  INTEGER
+                value:
+                  2836
+              END CONST
+          right =>
+            Binary (DIV):
+            left =>
+              Variable:
+              variable =>
+                VAR BEGIN
+                  type:
+                    INTEGER
+                END VAR
+            right =>
+              Number:
+              value =>
+                CONST BEGIN
+                  type:
+                    INTEGER
+                  value:
+                    127773
+                END CONST
+      If:
+      condition =>
+        Condition (>):
+        left =>
+          Variable:
+          variable =>
+            VAR BEGIN
+              type:
+                INTEGER
+            END VAR
+        right =>
+          Number:
+          value =>
+            CONST BEGIN
+              type:
+                INTEGER
+              value:
+                0
+            END CONST
+      true =>
+        Assign:
+        location =>
+          Variable:
+          variable =>
+            VAR BEGIN
+              type:
+                INTEGER
+            END VAR
+        expression =>
+          Variable:
+          variable =>
+            VAR BEGIN
+              type:
+                INTEGER
+            END VAR
+      false =>
+        Assign:
+        location =>
+          Variable:
+          variable =>
+            VAR BEGIN
+              type:
+                INTEGER
+            END VAR
+        expression =>
+          Binary (+):
+          left =>
+            Variable:
+            variable =>
+              VAR BEGIN
+                type:
+                  INTEGER
+              END VAR
+          right =>
+            Number:
+            value =>
+              CONST BEGIN
+                type:
+                  INTEGER
+                value:
+                  2147483647
+              END CONST
+      Write:
+      expression =>
+        Variable:
+        variable =>
+          VAR BEGIN
+            type:
+              INTEGER
+          END VAR
+test 2
+diff1
+diff2
+41d40
+< 
+diff3
+test3
+instructions =>
+  Assign:
+  location =>
+    Field:
+    location =>
+      Index:
+      location =>
+        Variable:
+        variable =>
+          VAR BEGIN
+            type:
+              ARRAY BEGIN
+                type:
+                  RECORD BEGIN
+                    SCOPE BEGIN
+                      f =>
+                        VAR BEGIN
+                          type:
+                            INTEGER
+                        END VAR
+                    END SCOPE
+                  END RECORD
+                length:
+                  12
+              END ARRAY
+          END VAR
+      expression =>
+        Number:
+        value =>
+          CONST BEGIN
+            type:
+              INTEGER
+            value:
+              7
+          END CONST
+    variable =>
+      Variable:
+      variable =>
+        VAR BEGIN
+          type:
+            INTEGER
+        END VAR
+  expression =>
+    Number:
+    value =>
+      CONST BEGIN
+        type:
+          INTEGER
+        value:
+          47
+      END CONST
+instructions =>
+  Assign:
+  location =>
+    Variable:
+    variable =>
+      VAR BEGIN
+        type:
+          INTEGER
+      END VAR
+  expression =>
+    Number:
+    value =>
+      CONST BEGIN
+        type:
+          INTEGER
+        value:
+          1
+      END CONST
+  If:
+  condition =>
+    Condition (=):
+    left =>
+      Number:
+      value =>
+        CONST BEGIN
+          type:
+            INTEGER
+          value:
+            0
+        END CONST
+    right =>
+      Number:
+      value =>
+        CONST BEGIN
+          type:
+            INTEGER
+          value:
+            0
+        END CONST
+  true =>
+    Repeat:
+    condition =>
+      Condition (#):
+      left =>
+        Number:
+        value =>
+          CONST BEGIN
+            type:
+              INTEGER
+            value:
+              0
+          END CONST
+      right =>
+        Number:
+        value =>
+          CONST BEGIN
+            type:
+              INTEGER
+            value:
+              0
+          END CONST
+    instructions =>
+      Assign:
+      location =>
+        Variable:
+        variable =>
+          VAR BEGIN
+            type:
+              INTEGER
+          END VAR
+      expression =>
+        Binary (-):
+        left =>
+          Binary (*):
+          left =>
+            Number:
+            value =>
+              CONST BEGIN
+                type:
+                  INTEGER
+                value:
+                  16807
+              END CONST
+          right =>
+            Binary (MOD):
+            left =>
+              Variable:
+              variable =>
+                VAR BEGIN
+                  type:
+                    INTEGER
+                END VAR
+            right =>
+              Number:
+              value =>
+                CONST BEGIN
+                  type:
+                    INTEGER
+                  value:
+                    127773
+                END CONST
+        right =>
+          Binary (*):
+          left =>
+            Number:
+            value =>
+              CONST BEGIN
+                type:
+                  INTEGER
+                value:
+                  2836
+              END CONST
+          right =>
+            Binary (DIV):
+            left =>
+              Variable:
+              variable =>
+                VAR BEGIN
+                  type:
+                    INTEGER
+                END VAR
+            right =>
+              Number:
+              value =>
+                CONST BEGIN
+                  type:
+                    INTEGER
+                  value:
+                    127773
+                END CONST
+      If:
+      condition =>
+        Condition (>):
+        left =>
+          Variable:
+          variable =>
+            VAR BEGIN
+              type:
+                INTEGER
+            END VAR
+        right =>
+          Number:
+          value =>
+            CONST BEGIN
+              type:
+                INTEGER
+              value:
+                0
+            END CONST
+      true =>
+        Assign:
+        location =>
+          Variable:
+          variable =>
+            VAR BEGIN
+              type:
+                INTEGER
+            END VAR
+        expression =>
+          Variable:
+          variable =>
+            VAR BEGIN
+              type:
+                INTEGER
+            END VAR
+      false =>
+        Assign:
+        location =>
+          Variable:
+          variable =>
+            VAR BEGIN
+              type:
+                INTEGER
+            END VAR
+        expression =>
+          Binary (+):
+          left =>
+            Variable:
+            variable =>
+              VAR BEGIN
+                type:
+                  INTEGER
+              END VAR
+          right =>
+            Number:
+            value =>
+              CONST BEGIN
+                type:
+                  INTEGER
+                value:
+                  2147483647
+              END CONST
+      Write:
+      expression =>
+        Variable:
+        variable =>
+          VAR BEGIN
+            type:
+              INTEGER
+          END VAR
+instructions =>
+  Assign:
+  location =>
+    Variable:
+    variable =>
+      VAR BEGIN
+        type:
+          INTEGER
+      END VAR
+  expression =>
+    Number:
+    value =>
+      CONST BEGIN
+        type:
+          INTEGER
+        value:
+          0
+      END CONST
+  Repeat:
+  condition =>
+    Condition (>=):
+    left =>
+      Variable:
+      variable =>
+        VAR BEGIN
+          type:
+            INTEGER
+        END VAR
+    right =>
+      Number:
+      value =>
+        CONST BEGIN
+          type:
+            INTEGER
+          value:
+            47
+        END CONST
+  instructions =>
+    Assign:
+    location =>
+      Index:
+      location =>
+        Variable:
+        variable =>
+          VAR BEGIN
+            type:
+              ARRAY BEGIN
+                type:
+                  INTEGER
+                length:
+                  47
+              END ARRAY
+          END VAR
+      expression =>
+        Variable:
+        variable =>
+          VAR BEGIN
+            type:
+              INTEGER
+          END VAR
+    expression =>
+      Number:
+      value =>
+        CONST BEGIN
+          type:
+            INTEGER
+          value:
+            64738
+        END CONST
+instructions =>
+  Assign:
+  location =>
+    Index:
+    location =>
+      Field:
+      location =>
+        Variable:
+        variable =>
+          VAR BEGIN
+            type:
+              RECORD BEGIN
+                SCOPE BEGIN
+                  D =>
+                    VAR BEGIN
+                      type:
+                        ARRAY BEGIN
+                          type:
+                            INTEGER
+                          length:
+                            10
+                        END ARRAY
+                    END VAR
+                END SCOPE
+              END RECORD
+          END VAR
+      variable =>
+        Variable:
+        variable =>
+          VAR BEGIN
+            type:
+              ARRAY BEGIN
+                type:
+                  INTEGER
+                length:
+                  10
+              END ARRAY
+          END VAR
+    expression =>
+      Number:
+      value =>
+        CONST BEGIN
+          type:
+            INTEGER
+          value:
+            3
+        END CONST
+  expression =>
+    Number:
+    value =>
+      CONST BEGIN
+        type:
+          INTEGER
+        value:
+          28
+      END CONST
+  Write:
+  expression =>
+    Index:
+    location =>
+      Field:
+      location =>
+        Variable:
+        variable =>
+          VAR BEGIN
+            type:
+              RECORD BEGIN
+                SCOPE BEGIN
+                  D =>
+                    VAR BEGIN
+                      type:
+                        ARRAY BEGIN
+                          type:
+                            INTEGER
+                          length:
+                            10
+                        END ARRAY
+                    END VAR
+                END SCOPE
+              END RECORD
+          END VAR
+      variable =>
+        Variable:
+        variable =>
+          VAR BEGIN
+            type:
+              ARRAY BEGIN
+                type:
+                  INTEGER
+                length:
+                  10
+              END ARRAY
+          END VAR
+    expression =>
+      Number:
+      value =>
+        CONST BEGIN
+          type:
+            INTEGER
+          value:
+            1
+        END CONST

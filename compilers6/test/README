@@ -1,0 +1,6 @@
+Anish Dalal
+adalal1@jhu.edu
+Assignment 6
+
+I am unable to get the interpreter working properly. I have tried many different options but I am unable to figure out how to make the interpreter find a variable in the environment if it is not in the top level scope. This is causing the majority of errors. 
+

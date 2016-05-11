@@ -1,0 +1,9 @@
+PROGRAM X;
+TYPE a = INTEGER;
+TYPE b = RECORD
+  a: INTEGER;
+  x: RECORD
+    b:a;
+  END;
+  END;  
+END X.

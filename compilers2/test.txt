@@ -1,0 +1,10 @@
+VAR ics142: ARRAY 5 OF INTEGER;
+(*asdf 8_9 * ()^D*)
+(*VAR (*(*hello*) ics142: ARRAY 5 OF INTEGER; (*final*)*)*)
+PROGRAM As3;
+CONST x = -47;
+TYPE T = RECO$RD f: INTEGER; END;
+VAR a: 123array123 12 OF T;
+BEGIN
+    a[7].f := -x/
+END As3.

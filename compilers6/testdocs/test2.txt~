@@ -1,0 +1,18 @@
+PROGRAM X;
+
+CONST i  = 3;
+CONST x = 0;
+      
+VAR A: ARRAY 5 OF INTEGER;
+VAR b: INTEGER;
+  
+BEGIN
+  b := 0
+  WHILE b < 5 DO
+      A[x] := x;
+      b := b + 1;
+  END
+  c := A[A[A[i]]];
+  WRITE c
+
+END X.

@@ -1,0 +1,20 @@
+PROGRAM X;
+CONST
+  sz = 5;
+VAR
+  a: ARRAY sz OF INTEGER;
+  i: INTEGER;
+  j: INTEGER;
+BEGIN
+  i := 0;
+  REPEAT
+    a[i] := i*2;
+    WRITE a[i];
+    i := i + 1
+  UNTIL i >= sz END;
+  (*j := 0;
+  WHILE j < 5 DO
+    WRITE a[j];
+    j := j + 1
+  END*)
+END X.

@@ -1,0 +1,7 @@
+PROGRAM X;
+VAR
+  a: ARRAY 5 OF INTEGER;
+BEGIN
+  a[3] := 3;
+  WRITE a[3]
+END X.

@@ -1,0 +1,16 @@
+PROGRAM X;
+CONST
+  sz = 10;
+VAR
+  a: ARRAY sz OF INTEGER;
+  i: INTEGER;
+BEGIN
+  i := 0;
+  a[i] := 0;
+  i := i + 1;
+  REPEAT
+    a[i] := a[i-1] + 1;
+    WRITE a[i];
+    i := i + 1
+  UNTIL i >= sz END
+END X.

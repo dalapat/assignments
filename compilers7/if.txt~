@@ -1,0 +1,18 @@
+PROGRAM X;
+CONST
+  sz = 5;
+VAR
+  a: ARRAY sz OF INTEGER;
+  i: INTEGER;
+BEGIN
+  i := 1;
+  a[i] := 3;
+  WRITE a[i];
+  a[i] := a[i] + 1;
+  WRITE a[i];
+  IF a[i] < 2 THEN
+    WRITE i
+  ELSE
+    WRITE a[i]
+  END
+END X.

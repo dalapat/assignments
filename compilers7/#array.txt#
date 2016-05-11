@@ -1,0 +1,15 @@
+PROGRAM X;
+CONST
+  sz = 5;
+VAR
+  a: ARRAY sz OF INTEGER;
+  i: INTEGER;
+  j: INTEGER;
+BEGIN
+  i := 0;
+  REPEAT
+    a[i] := i*2;
+    i := i + 1
+  UNTIL i >= sz END;
+
+END X.
