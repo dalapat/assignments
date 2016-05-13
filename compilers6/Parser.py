@@ -563,10 +563,10 @@ class Parser:
     def get_negation(self, condition_node):
         relation_negation = {"=":"#",
                              "#":"=",
-                             "<":">",
-                             ">":"<",
-                             "<=":">=",
-                             ">=":"<="}
+                             "<":">=",
+                             ">":"<=",
+                             "<=":">",
+                             ">=":"<"}
         negation_condition_node = ConditionNode(condition_node.exp_left, condition_node.exp_right,
                                                 relation_negation[condition_node.relation])
         return negation_condition_node
@@ -738,8 +738,9 @@ def main():
     #f = open("../compilers5/test6.txt")
     #f = open("test.txt")
     #f = open("test2.txt")
-    f = open("random.sim")
+    #f = open("random.sim")
     #f = open("test4.txt") # 20 23 45
+    f = open("t4.txt")
     input_string = ""
     for line in f:
         input_string += line

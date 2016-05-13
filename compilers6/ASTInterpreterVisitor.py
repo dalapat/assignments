@@ -60,6 +60,9 @@ class ASTInterpreterVisitor:
             repeat_node.condition.int_visit(self)
             flag = self.stack.pop()
 
+            if flag == 1:
+                break
+
     def visitConditionNode(self, condition_node):
 
         #relation_map = {"=":"==", "#":"!=", ">":">", "<":"<",
