@@ -43,6 +43,7 @@ class CodeGenerator:
         self.output_string += "vars:\t\t.space {0}\n".format(self.scope.stsize)
         #self.cgwrite(".space {0}".format(self.scope.stsize))
         self.output_string += "format:\t\t.asciz \"%d\\n\"\n" # does a dot need to be here
+        self.output_string += "scan_format:\t\t.asciz\"%d\"\n"
         #self.cgwrite(".asciz \"%d\\n\"")
         self.cgwrite(".text")
         #self.cgwrite(".align 4")
@@ -84,8 +85,8 @@ class CodeGenerator:
     # perform left to right post order traversal on ast
     def code_generator(self, ast):
         if isinstance(ast, NumberNode):
-            self.output_string += "\t\tldr r2, ={0}\n".format(ast.constant.value)
-            self.output_string += "\t\tpush {r2}\n"
+            self.cgwrite("ldr r2, ={0}".format(ast.constant.value))
+            self.cgwrite("push {r2}")
             return "number"
         elif isinstance(ast, BinaryNode):
             s1 = self.code_generator(ast.exp_left)
@@ -98,24 +99,30 @@ class CodeGenerator:
                 self.cgwrite("pop {r2}")
                 self.cgwrite("ldr r2, [r2]")
                 self.cgwrite("push {r2}")
-            self.output_string += "\t\tpop {r2}\n"
-            self.output_string += "\t\tpop {r3}\n"
+            #self.output_string += "\t\tpop {r2}\n"
+            #self.output_string += "\t\tpop {r3}\n"
+            self.cgwrite("pop {r1}")
+            self.cgwrite("pop {r0}")
             if ast.operator == "+":
-                self.cgwrite("@plus")
-                self.output_string += "\t\tadd r2, r2, r3\n"
+                #self.cgwrite("@plus")
+                self.output_string += "\t\tadd r2, r0, r1\n"
                 self.output_string += "\t\tpush {r2}\n"
             elif ast.operator == "-":
-                self.output_string += "\t\tsub r2, r2, r3\n"
+                self.output_string += "\t\tsub r2, r0, r1\n"
                 self.output_string += "\t\tpush {r2}\n"
             elif ast.operator == "*":
-                self.output_string += "\t\tmul r2, r2, r3\n"
+                self.output_string += "\t\tmul r2, r0, r1\n"
                 self.output_string += "\t\tpush {r2}\n"
             elif ast.operator == "DIV":
-                self.output_string += "\t\tsdiv r2, r2, r3\n"
-                self.output_string += "\t\tpush {r2}\n"
+                self.cgwrite("bl __aeabi_idiv")
+                self.cgwrite("push {r0}")
+                #self.output_string += "\t\tsdiv r2, r2, r3\n"
+                #self.output_string += "\t\tpush {r2}\n"
             elif ast.operator == "MOD":
-                self.output_string += "\t\tmod r2, r2, r3\n"
-                self.output_string += "\t\tpush {r2}\n"
+                self.cgwrite("bl __aeabi_idivmod")
+                self.cgwrite("push {r2}")
+                #self.output_string += "\t\tmod r2, r0, r1\n"
+                #self.output_string += "\t\tpush {r2}\n"
             else:
                 sys.stderr.write("error: invalid operator")
             return "number"
@@ -176,22 +183,23 @@ class CodeGenerator:
         elif isinstance(ast, ReadNode):
             # unfinished
             self.code_generator(ast.location)
-            self.cgwrite("pop {r2}")
-            self.cgwrite("ldr r0, =format")
-            self.cgwrite("mov r1, r2")
+            self.cgwrite("pop {r1}")
+            self.cgwrite("ldr r0, =scan_format")
+            #self.cgwrite("mov r1, r2")
             self.cgwrite("bl scanf")
             if ast._next is not None:
                 ast._next.cg_visit(self)
             return "t"
         elif isinstance(ast, WriteNode):
             #self.cgwrite("@write")
-            self.code_generator(ast.expression)
-            self.cgwrite("pop {r2}")
-            self.cgwrite("ldr r2, [r2]")
-            self.cgwrite("push {r2}")
-            self.cgwrite("pop {r2}")
+            s1 = self.code_generator(ast.expression)
+            if s1 == "location":
+                self.cgwrite("pop {r2}")
+                self.cgwrite("ldr r2, [r2]")
+                self.cgwrite("push {r2}")
+            self.cgwrite("pop {r1}")
             self.cgwrite("ldr r0, =format")
-            self.cgwrite("mov r1, r2")
+            #self.cgwrite("mov r1, r2")
             self.cgwrite("bl printf")
             if ast._next is not None:
                 ast._next.cg_visit(self)
@@ -245,7 +253,6 @@ class CodeGenerator:
             self.cgwrite("push {r2}")
             return "t"
         elif isinstance(ast, FieldNode):
-            # unfinished
             pass
         elif isinstance(ast, IndexNode):
             self.code_generator(ast.location)

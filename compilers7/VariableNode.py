@@ -17,3 +17,9 @@ class VariableNode(ExpressionNode):
 
     def visit(self, visitor):
         visitor.visitVariableNode(self)
+
+    def int_visit(self, visitor):
+        return visitor.visitVariableNode(self)
+
+    def ncg_visit(self, visitor):
+        return visitor.visitVariableNode(self)

@@ -12,8 +12,17 @@ class Variable(Entry):
     def visit(self, visitor):
         visitor.visitVar(self)
 
+    def get_offset(self):
+        return self.offset
+
     def set_offset(self, value):
         self.offset = value
 
-    def get_offset(self):
-        return self.offset
+    def st_visit(self, visitor):
+        return visitor.visitVar(self)
+
+    def cg_visit(self, visitor):
+        pass
+
+    def ncg_visit(self, visitor):
+        return visitor.visitVar(self)

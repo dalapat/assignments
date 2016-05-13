@@ -16,5 +16,11 @@ class AssignNode(InstructionNode):
     def visit(self, visitor):
         visitor.visitAssignNode(self)
 
+    def int_visit(self, visitor):
+        visitor.visitAssignNode(self)
+
+    def ncg_visit(self, visitor):
+        return visitor.visitAssignNode(self)
+
     #def int_visit(self, visitor):
     #    visitor.visitNode(self)

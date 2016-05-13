@@ -8,6 +8,7 @@ class Array(Type):
         self.length = length
         self.unit_size = 0
         self._type = _type
+        self.size = 0
 
     # output the length and type
     def visit(self, visitor):
@@ -16,5 +17,14 @@ class Array(Type):
     def get_length(self):
         return self.length
 
-    def get_type(self):
-        return self._type
+    def get_size(self):
+        return self.size
+
+    def get_unit_size(self):
+        return self.unit_size
+
+    def st_visit(self, visitor):
+        return visitor.visitArray(self)
+
+    def ncg_visit(self, visitor):
+        return visitor.visitArray(self)

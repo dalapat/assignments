@@ -18,3 +18,9 @@ class IfNode(InstructionNode):
 
     def visit(self, visitor):
         visitor.visitIfNode(self)
+
+    def int_visit(self, visitor):
+        return visitor.visitIf(self)
+
+    def ncg_visit(self, visitor):
+        return visitor.visitIfNode(self)

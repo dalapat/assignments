@@ -12,3 +12,6 @@ class FieldNode(ExpressionNode):
 
     def visit(self, visitor):
         visitor.visitFieldNode(self)
+
+    def int_visit(self, visitor):
+        return visitor.visitFieldNode(self)

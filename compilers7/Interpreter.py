@@ -57,6 +57,8 @@ class Interpreter:
                 if second == 0:
                     sys.stderr.write("error: division by 0")
                     exit(1)
+                if isinstance(first_val, IntegerBox):
+                    print first_val.get()
                 self.stack.append(first_val % second_val)
             else:
                 sys.stderr.write("error: invalid operator")
@@ -71,6 +73,8 @@ class Interpreter:
             self.interpret(ast.expression, environment)
             exp = self.stack.pop()
             loc = self.stack.pop()
+            if isinstance(exp, IntegerBox):
+                exp = exp.get()
             loc.set(exp)
             if ast._next is not None:
                 ast._next.int_visit(self, self.environment)
@@ -119,8 +123,14 @@ class Interpreter:
             self.interpret(ast.exp_left, environment)
             self.interpret(ast.exp_right, environment)
             relation = ast.relation
-            left = self.stack.pop()
+            #left = self.stack.pop()
+            #right = self.stack.pop()
             right = self.stack.pop()
+            left = self.stack.pop()
+            if isinstance(left, IntegerBox):
+                left = left.get()
+            if isinstance(right, IntegerBox):
+                right = right.get()
             if relation == "<":
                 if left < right:
                     self.stack.append(1)
@@ -156,6 +166,7 @@ class Interpreter:
                 exit(1)
         elif isinstance(ast, FieldNode):
             self.interpret(ast.location, environment)
+            # changed: commented 2 lines below
             #self.interpret(ast.variable, environment)
             #field = self.stack.pop()
             record = self.stack.pop()

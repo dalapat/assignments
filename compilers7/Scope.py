@@ -5,7 +5,6 @@ from Variable import Variable
 from IntegerBox import IntegerBox
 from ArrayBox import ArrayBox
 from RecordBox import RecordBox
-
 import sys
 class Scope:
     # represent a symbol table
@@ -14,7 +13,6 @@ class Scope:
     def __init__(self, outer_scope):
         self.outer_scope = outer_scope
         self.symbol_table = {}
-        self.stsize = 0
 
     # insert a name and associated type into the symbol table
     def insert(self, name, _type):
@@ -46,16 +44,6 @@ class Scope:
                 environment[identifier] = self.make_box(self.symbol_table[identifier]._type)
         return environment
 
-    def make_code_generator_environment(self):
-        environment = {}
-        offset = 0
-        for identifier in self.symbol_table:
-            if isinstance(self.symbol_table[identifier], Variable):
-                self.symbol_table[identifier].set_offset(offset)
-                size = self.make_offset(self.symbol_table[identifier]._type)
-                offset += size
-        self.stsize = offset
-
     def make_box(self, type):
         if isinstance(type, Integer):
             return IntegerBox()
@@ -72,7 +60,7 @@ class Scope:
 
     def make_offset(self, type):
         if isinstance(type, Integer):
-            return type.get_size()
+            return type.size
         elif isinstance(type, Array):
             array_type_size = self.make_offset(type._type)
             type.unit_size = array_type_size
@@ -88,4 +76,21 @@ class Scope:
         else:
             sys.stderr.write("error: invalid type\n")
             exit(1)
+
+    def make_code_generator_environment(self):
+        environment = {}
+        offset = 0
+        for identifier in self.symbol_table:
+            if isinstance(self.symbol_table[identifier], Variable):
+                self.symbol_table[identifier].set_offset(offset)
+                size = self.make_offset(self.symbol_table[identifier]._type)
+                offset += size
+        self.stsize = offset
+
+    def st_visit(self, visitor):
+        return visitor.visitScope(self)
+
+    def ncg_visit(self, visitor):
+        return visitor.visitScope(self)
+
 

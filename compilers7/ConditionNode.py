@@ -18,4 +18,7 @@ class ConditionNode(Node):
         visitor.visitConditionNode(self)
 
     def int_visit(self, visitor):
-        visitor.visitNode(self)
+        return visitor.visitConditionNode(self)
+
+    def ncg_visit(self, visitor):
+        return visitor.visitConditionNode(self)

@@ -4,6 +4,10 @@ from Token import Token
 from Observer import Observer
 ###
 from Scope import Scope
+from ASTInterpreterVisitor import ASTInterpreterVisitor
+from ASTCGVisitor import ASTCGVisitor
+from SymbolTableVisitor import SymbolTableVisitor
+from CGSymbolTableVisitor import CGSymbolTableVisitor
 from Constant import Constant
 from Integer import Integer, integerInstance
 from Array import Array
@@ -25,11 +29,11 @@ from IntegerBox import IntegerBox
 from ArrayBox import ArrayBox
 from RecordBox import RecordBox
 from Interpreter import Interpreter
-from CodeGenerator import CodeGenerator
 
 from Visitor import Visitor
 from ASTvisitor import ASTvisitor
 from InterpreterVisitor import InterpreterVisitor
+from CodeGenerator import CodeGenerator
 import sys
 
 
@@ -43,8 +47,7 @@ class Parser:
 
     # initializes Parser instance and parses a list of tokens
     # cmd line arguments determine output type
-    def __init__(self, observer = Observer(), filename = "", token_list=[],
-                 print_symbol_table = 0, visitor = Visitor()):
+    def __init__(self, observer = Observer(), token_list=[], print_symbol_table = 0, visitor = Visitor()):
         self.current = 0 # current position in token list
         self.token_list = token_list # token list received from scanner
         self.kind_map = Token.kind_map # dictionary of token kinds
@@ -56,7 +59,6 @@ class Parser:
         self.current_scope = self.program_scope # current scope for switching between scopes
         self.print_symbol_table = print_symbol_table # determines whether to print cst or st
         self.visitor = visitor
-        self.filename = filename
 
     # parse the token list
     def parse(self):
@@ -75,29 +77,30 @@ class Parser:
                 currinstruction.visit(self.visitor)
                 # currinstruction = currinstruction._next
             elif self.print_symbol_table == 3:
-                environment = self.program_scope.make_environment()
+                '''environment = self.program_scope.make_environment()
                 stack = []
                 currinstruction = instructions
-                #while curr is not None:
-                #    self.interpret(curr, environment, stack)
-                #    curr = curr._next
-                #v = InterpreterVisitor(environment)
-                #v.start()
-                #currinstruction.int_visit(v)
                 v = Interpreter(currinstruction, environment)
                 v.start()
+                '''
+                visitor = SymbolTableVisitor()
+                environment = self.current_scope.st_visit(visitor)
+                interpreter = ASTInterpreterVisitor(environment, instructions)
+                interpreter.start()
             elif self.print_symbol_table == 4:
-                #environment = self.program_scope.make_code_generator_environment()
-                #print environment
+
+                visitor = CGSymbolTableVisitor()
+                environment = self.current_scope.ncg_visit(visitor)
+                code_generator = ASTCGVisitor(environment, instructions)
+                code_generator.start()
+                #print environment.env_size
+                '''
                 self.program_scope.make_code_generator_environment()
                 c = CodeGenerator(self.program_scope, 0, instructions)
                 c.start()
                 c.cgoutput()
-            elif self.print_symbol_table == 5:
-                self.program_scope.make_code_generator_environment()
-                c = CodeGenerator(self.program_scope, 1, instructions, filename=self.filename+".s")
-                c.start()
-                c.cgoutput()
+                '''
+
 
     # check if the currently parsed token is a token we are
     # expecting to find
@@ -495,11 +498,14 @@ class Parser:
             node = self._read()
         elif self.token_list[self.current].kind == self.kind_map["WRITE"]:
             node = self._write()
+        elif self.token_list[self.current].kind == self.kind_map["END"]:
+            pass
         else:
             self.total_error_flag = 1
-            sys.stderr.write("error: not a valid instruction\n"
-                             "@({0}, {1})".format(self.token_list[self.current].start_position,
-                                                  self.token_list[self.current].end_position))
+            sys.stderr.write("error: not a valid instruction \"{0}\"\n"
+                             "@({1}, {2})".format(self.token_list[self.current].get_token_name(),
+                                                  self.token_list[self.current].start_position,
+                                                  self.token_list[self.current].end_position) + "\n")
             exit(1)
         self.observer.end_instruction()
         return node
@@ -575,10 +581,10 @@ class Parser:
     def get_negation(self, condition_node):
         relation_negation = {"=":"#",
                              "#":"=",
-                             "<":">",
-                             ">":"<",
-                             "<=":">=",
-                             ">=":"<="}
+                             "<":">=",
+                             ">":"<=",
+                             "<=":">",
+                             ">=":"<"}
         negation_condition_node = ConditionNode(condition_node.exp_left, condition_node.exp_right,
                                                 relation_negation[condition_node.relation])
         return negation_condition_node
@@ -742,15 +748,18 @@ class Parser:
         self.observer.end_expression_list()
         return exp_list
 
-'''
+
 def main():
     #f = open("../compilers4/test2.txt")
     #f = open("../compilers4/test.txt")
     #f = open("../compilers5/test5.txt")
     #f = open("../compilers5/test6.txt")
     #f = open("test.txt")
-    f = open("test5.txt")
-    #f = open("./test/test.txt") # 20 23 45
+    #f = open("test2.txt")
+    #f = open("random.sim")
+    #f = open("test4.txt") # 20 23 45
+    f = open("test4.txt")
+
     input_string = ""
     for line in f:
         input_string += line
@@ -758,8 +767,8 @@ def main():
     f.close()
     s = Scanner(input_string)
     token_list = s.all()
-    p = Parser(token_list=token_list, print_symbol_table=5, visitor=ASTvisitor(), filename="test")
+    p = Parser(token_list=token_list, print_symbol_table=4, visitor=ASTvisitor())
     p.parse()
     #print p.program_scope
 main()
-'''
+
