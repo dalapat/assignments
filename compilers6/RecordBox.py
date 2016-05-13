@@ -4,11 +4,11 @@ import sys
 class RecordBox(Box):
 
     def __init__(self, fields):
-        self.fields = fields
+        self.value = fields
         self.length = len(fields)
 
     def get_field(self, field):
-        return self.fields[field]
+        return self.value[field]
 
     def copy(self, record_box):
         if not isinstance(record_box, RecordBox):
@@ -17,5 +17,5 @@ class RecordBox(Box):
         if not self.length == record_box.length:
             sys.stderr.write("error: number of fields mismatched")
 
-        for field in record_box.fields:
-            self.fields[field] = record_box.fields[field]
+        for field in record_box.value:
+            self.value[field] = record_box.value[field]

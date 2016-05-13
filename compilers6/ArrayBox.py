@@ -9,13 +9,13 @@ class ArrayBox(Box):
 
     # initializes an array box
     def __init__(self, list):
-        self.list = list # actual array elements
+        self.value = list # actual array elements
         self.length = len(list) # length of array
 
     # returns the array element at index i
     def index(self, i):
         if 0 <= i < self.length:
-            return self.list[i]
+            return self.value[i]
         else:
             sys.stderr.write("error: index out of bounds")
             exit(1)
@@ -29,5 +29,5 @@ class ArrayBox(Box):
             sys.stderr.write("error: lengths of array are different")
             exit(1)
         for i in range(array.length):
-            self.list[i] = array.list[i]
+            self.value[i] = array.list[i]
 

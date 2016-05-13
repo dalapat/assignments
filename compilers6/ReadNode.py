@@ -13,3 +13,6 @@ class ReadNode(InstructionNode):
 
     def visit(self, visitor):
         visitor.visitReadNode(self)
+
+    def int_visit(self, visitor):
+        return visitor.visitReadNode(self)

@@ -17,3 +17,6 @@ class RepeatNode(InstructionNode):
 
     #def int_visit(self, visitor):
     #    visitor.visitNode()
+
+    def int_visit(self, visitor):
+        visitor.visitRepeatNode(self)

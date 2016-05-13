@@ -18,4 +18,4 @@ class ConditionNode(Node):
         visitor.visitConditionNode(self)
 
     def int_visit(self, visitor):
-        visitor.visitNode(self)
+        return visitor.visitConditionNode(self)

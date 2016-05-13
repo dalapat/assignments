@@ -12,3 +12,6 @@ class WriteNode(InstructionNode):
 
     def visit(self, visitor):
         visitor.visitWriteNode(self)
+
+    def int_visit(self, visitor):
+        return visitor.visitWriteNode(self)

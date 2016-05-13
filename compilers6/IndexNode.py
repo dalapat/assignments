@@ -13,3 +13,6 @@ class IndexNode(ExpressionNode):
 
     def visit(self, visitor):
         visitor.visitIndexNode(self)
+
+    def int_visit(self, visitor):
+        return visitor.visitIndexNode(self)

@@ -11,4 +11,7 @@ class Integer(Type):
     def visit(self, visitor):
         visitor.visitInt()
 
+    def st_visit(self, visitor):
+        return visitor.visitInt()
+
 integerInstance = Integer()

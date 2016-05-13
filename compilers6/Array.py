@@ -11,3 +11,6 @@ class Array(Type):
     # output the length and type
     def visit(self, visitor):
         visitor.visitArray(self)
+
+    def st_visit(self, visitor):
+        return visitor.visitArray(self)

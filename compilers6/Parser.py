@@ -4,6 +4,8 @@ from Token import Token
 from Observer import Observer
 ###
 from Scope import Scope
+from ASTInterpreterVisitor import ASTInterpreterVisitor
+from SymbolTableVisitor import SymbolTableVisitor
 from Constant import Constant
 from Integer import Integer, integerInstance
 from Array import Array
@@ -72,17 +74,17 @@ class Parser:
                 currinstruction.visit(self.visitor)
                 # currinstruction = currinstruction._next
             elif self.print_symbol_table == 3:
-                environment = self.program_scope.make_environment()
+                '''environment = self.program_scope.make_environment()
                 stack = []
                 currinstruction = instructions
-                #while curr is not None:
-                #    self.interpret(curr, environment, stack)
-                #    curr = curr._next
-                #v = InterpreterVisitor(environment)
-                #v.start()
-                #currinstruction.int_visit(v)
                 v = Interpreter(currinstruction, environment)
                 v.start()
+                '''
+                visitor = SymbolTableVisitor()
+                environment = self.current_scope.st_visit(visitor)
+                interpreter = ASTInterpreterVisitor(environment, instructions)
+                interpreter.start()
+
 
     # check if the currently parsed token is a token we are
     # expecting to find
@@ -728,7 +730,7 @@ class Parser:
         self.observer.end_expression_list()
         return exp_list
 
-
+'''
 def main():
     #f = open("../compilers4/test2.txt")
     #f = open("../compilers4/test.txt")
@@ -736,7 +738,7 @@ def main():
     #f = open("../compilers5/test6.txt")
     #f = open("test.txt")
     #f = open("test2.txt")
-    f = open("random3.sim")
+    f = open("random.sim")
     #f = open("test4.txt") # 20 23 45
     input_string = ""
     for line in f:
@@ -749,3 +751,4 @@ def main():
     p.parse()
     #print p.program_scope
 main()
+'''

@@ -8,5 +8,8 @@ class InstructionNode(Node):
     def to_string(self):
         pass
 
-    def int_visit(self, interpreter, environment):
-        interpreter.interpret(self, environment)
+    #def int_visit(self, interpreter, environment):
+    #    interpreter.interpret(self, environment)
+
+    def int_visit(self, visitor):
+        pass

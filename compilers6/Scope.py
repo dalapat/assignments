@@ -57,4 +57,7 @@ class Scope:
                 fields[field] = self.make_box(type.scope.symbol_table[field]._type)
             return RecordBox(fields)
 
+    def st_visit(self, visitor):
+        return visitor.visitScope(self)
+
 

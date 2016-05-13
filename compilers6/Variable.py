@@ -10,3 +10,6 @@ class Variable(Entry):
     # output the type of a variable
     def visit(self, visitor):
         visitor.visitVar(self)
+
+    def st_visit(self, visitor):
+        return visitor.visitVar(self)
