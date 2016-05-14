@@ -15,3 +15,6 @@ class FieldNode(ExpressionNode):
 
     def int_visit(self, visitor):
         return visitor.visitFieldNode(self)
+
+    def ncg_visit(self, visitor):
+        return visitor.visitFieldNode(self)

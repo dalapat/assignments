@@ -6,6 +6,7 @@ class ASTCGVisitor:
         self.environment = environment
         self.numif = 0
         self.output_string = ""
+        self.stack = []
         self.num_loop = 0
 
     def cgwrite(self, string):
@@ -17,7 +18,7 @@ class ASTCGVisitor:
         self.cgwrite(".align 2")
         self.cgwrite(".global main")
         self.cgwrite(".data")
-        self.output_string += "vars:\t\t.space {0}\n".format(self.environment.env_size)
+        self.output_string += "vars:\t\t.space {0}\n".format(self.environment.size)
         #self.cgwrite(".space {0}".format(self.scope.stsize))
         self.output_string += "format:\t\t.asciz \"%d\\n\"\n" # does a dot need to be here
         self.output_string += "scan_format:\t\t.asciz\"%d\"\n"
@@ -32,13 +33,18 @@ class ASTCGVisitor:
         self.visitInstructions(self.ast)
         self.cgwrite("bl exit")
 
+    def cgoutput(self):
+        f = open("test.s", "w")
+        f.write(self.output_string)
+        f.close()
+
     def visitInstructions(self, head):
         while head is not None:
             head.ncg_visit(self)
             head = head._next
 
     def visitVariableNode(self, variable_node):
-        self.cgwrite("add r2, r11, #{0}".format(self.environment.find(variable_node.variable_name).offset))
+        self.cgwrite("add r2, r11, #{0}".format(variable_node.variable.offset))
         self.cgwrite("push {r2}")
         return "location"
 
@@ -54,6 +60,11 @@ class ASTCGVisitor:
             self.cgwrite("pop {r3}")
             self.cgwrite("pop {r2}")
             self.cgwrite("str r3, [r2]")
+            #self.cgwrite("push {r2}")
+        #self.cgwrite("pop {r2}")
+        '''self.cgwrite("pop {r2}")
+        self.cgwrite("pop {r3}")
+        self.cgwrite("str r2, r3")'''
 
     def visitIfNode(self, if_node):
         if_node.condition.ncg_visit(self)
@@ -148,7 +159,7 @@ class ASTCGVisitor:
             self.cgwrite("ldr r2, [r2]")
             self.cgwrite("push {r2}")
         self.cgwrite("ldr r3, ={0}".format(self.environment.
-                                           find(index_node.location.variable_name).unit_size))
+                                           find(index_node.location.variable_name)._type.unit_size))
         self.cgwrite("pop {r2}")
         self.cgwrite("mul r2, r2, r3")
         self.cgwrite("push {r2}")
@@ -158,9 +169,17 @@ class ASTCGVisitor:
         self.cgwrite("push {r2}")
         return "location"
 
+    def visitNumberNode(self, number_node):
+        self.cgwrite("ldr r2, ={0}".format(number_node.constant.value))
+        self.cgwrite("push {r2}")
+        return "number"
+
     def visitFieldNode(self, field_node):
         field_node.location.ncg_visit(self)
         field_node.variable.ncg_visit(self)
+        self.cgwrite("pop {r2}")
+        self.cgwrite("ldr r2, [r2]")
+        self.cgwrite("push {r2}")
         self.cgwrite("pop {r2}")
         self.cgwrite("pop {r3}")
         self.cgwrite("add r2, r3, r2")
@@ -168,7 +187,37 @@ class ASTCGVisitor:
         return "location"
 
     def visitBinaryNode(self, binary_node):
-        
+        re = binary_node.exp_left.ncg_visit(self)
+        if re == "location":
+            self.cgwrite("pop {r2}")
+            self.cgwrite("ldr r2, [r2]")
+            self.cgwrite("push {r2}")
+        le = binary_node.exp_right.ncg_visit(self)
+        if le == "location":
+            self.cgwrite("pop {r2}")
+            self.cgwrite("ldr r2, [r2]")
+            self.cgwrite("push {r2}")
+        self.cgwrite("pop {r1}")
+        self.cgwrite("pop {r0}")
+        if binary_node.operator == "+":
+            self.cgwrite("add r2, r0, r1")
+            self.cgwrite("push {r2}")
+        elif binary_node.operator == "-":
+            self.cgwrite("sub r2, r0, r1")
+            self.cgwrite("push {r2}")
+        elif binary_node.operator == "*":
+            self.cgwrite("mul r2, r0, r1")
+            self.cgwrite("push {r2}")
+        elif binary_node.operator == "DIV":
+            self.cgwrite("bl __aeabi_idiv")
+            self.cgwrite("push {r0}")
+        elif binary_node.operator == "MOD":
+            self.cgwrite("bl __aeabi_idivmod")
+            self.cgwrite("push {r2}")
+        else:
+            pass
+        return "number"
+
 
 
 

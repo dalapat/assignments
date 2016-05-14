@@ -13,6 +13,7 @@ class Scope:
     def __init__(self, outer_scope):
         self.outer_scope = outer_scope
         self.symbol_table = {}
+        self.size = 0
 
     # insert a name and associated type into the symbol table
     def insert(self, name, _type):

@@ -47,7 +47,8 @@ class Parser:
 
     # initializes Parser instance and parses a list of tokens
     # cmd line arguments determine output type
-    def __init__(self, observer = Observer(), token_list=[], print_symbol_table = 0, visitor = Visitor()):
+    def __init__(self, observer = Observer(),
+                 token_list=[], print_symbol_table = 0, visitor = Visitor()):
         self.current = 0 # current position in token list
         self.token_list = token_list # token list received from scanner
         self.kind_map = Token.kind_map # dictionary of token kinds
@@ -90,9 +91,10 @@ class Parser:
             elif self.print_symbol_table == 4:
 
                 visitor = CGSymbolTableVisitor()
-                environment = self.current_scope.ncg_visit(visitor)
-                code_generator = ASTCGVisitor(environment, instructions)
+                self.current_scope.ncg_visit(visitor)
+                code_generator = ASTCGVisitor(self.current_scope, instructions)
                 code_generator.start()
+                code_generator.cgoutput()
                 #print environment.env_size
                 '''
                 self.program_scope.make_code_generator_environment()
@@ -758,7 +760,7 @@ def main():
     #f = open("test2.txt")
     #f = open("random.sim")
     #f = open("test4.txt") # 20 23 45
-    f = open("test4.txt")
+    f = open("record.txt")
 
     input_string = ""
     for line in f:
@@ -771,4 +773,3 @@ def main():
     p.parse()
     #print p.program_scope
 main()
-

@@ -7,6 +7,7 @@ class Variable(Entry):
     def __init__(self, _type):
         self._type = _type
         self.offset = 0
+        self.size = 0
 
     # output the type of a variable
     def visit(self, visitor):

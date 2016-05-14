@@ -17,6 +17,9 @@ class NumberNode(ExpressionNode):
     def int_visit(self, visitor):
         return visitor.visitNumberNode(self)
 
+    def ncg_visit(self, visitor):
+        return visitor.visitNumberNode(self)
+
     #def int_visit(self, visitor):
     #    visitor.visitNode(self)
 

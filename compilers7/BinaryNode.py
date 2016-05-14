@@ -25,3 +25,6 @@ class BinaryNode(ExpressionNode):
     def int_visit(self, visitor):
         return visitor.visitBinaryNode(self)
 
+    def ncg_visit(self, visitor):
+        return visitor.visitBinaryNode(self)
+
