@@ -1,4 +1,7 @@
 import sys
+from Array import Array
+from Record import Record
+from Integer import Integer
 class ASTCGVisitor:
 
     def __init__(self, environment, ast):
@@ -167,8 +170,15 @@ class ASTCGVisitor:
             self.cgwrite("pop {r2}")
             self.cgwrite("ldr r2, [r2]")
             self.cgwrite("push {r2}")
-        self.cgwrite("ldr r3, ={0}".format(self.environment.
-                                           find(index_node.location.variable_name)._type.unit_size))
+        if isinstance(index_node.location.type, Array):
+            self.cgwrite("ldr r3, ={0}".format(index_node.location.type.unit_size))
+        elif isinstance(index_node.location.type, Record):
+            self.cgwrite("ldr r3, ={0}".format(index_node.location.type.size))
+        elif isinstance(index_node.location.type, Integer):
+            self.cgwrite("ldr r3, ={0}".format(index_node.location.type.size))
+        else:
+            sys.stderr.write("error: type")
+            exit(1)
         self.cgwrite("pop {r2}")
         self.cgwrite("mul r2, r2, r3")
         self.cgwrite("push {r2}")
