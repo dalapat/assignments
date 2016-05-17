@@ -7,6 +7,7 @@ class ASTCGVisitor:
         self.numif = 0
         self.output_string = ""
         self.stack = []
+        self.index_node_flag = 0
         self.num_loop = 0
 
     def cgwrite(self, string):
@@ -34,7 +35,7 @@ class ASTCGVisitor:
         self.cgwrite("bl exit")
 
     def cgoutput(self):
-        f = open("test.s", "w")
+        f = open("test2.s", "w")
         f.write(self.output_string)
         f.close()
 
@@ -44,11 +45,13 @@ class ASTCGVisitor:
             head = head._next
 
     def visitVariableNode(self, variable_node):
+        self.cgwrite("@Variable")
         self.cgwrite("add r2, r11, #{0}".format(variable_node.variable.offset))
         self.cgwrite("push {r2}")
         return "location"
 
     def visitAssignNode(self, assign_node):
+        self.cgwrite("@Assign")
         assign_node.location.ncg_visit(self)
         s = assign_node.expression.ncg_visit(self)
         if s == "location":
@@ -67,6 +70,7 @@ class ASTCGVisitor:
         self.cgwrite("str r2, r3")'''
 
     def visitIfNode(self, if_node):
+        self.cgwrite("@If")
         if_node.condition.ncg_visit(self)
         self.numif += 1
         local_numif = self.numif
@@ -85,6 +89,7 @@ class ASTCGVisitor:
         self.output_string += "endif{0}:\n".format(local_numif)
 
     def visitConditionNode(self, condition_node):
+        self.cgwrite("@Condition")
         s1 = condition_node.exp_left.ncg_visit(self)
         if s1 == "location":
             self.cgwrite("pop {r2}")
@@ -122,6 +127,7 @@ class ASTCGVisitor:
         self.cgwrite("push {r2}")
 
     def visitReadNode(self, read_node):
+        self.cgwrite("@Read")
         read_node.location.ncg_visit(self)
         self.cgwrite("pop {r1}")
         self.cgwrite("ldr r0, =scan_format")
@@ -129,6 +135,7 @@ class ASTCGVisitor:
         self.cgwrite("bl scanf")
 
     def visitWriteNode(self, write_node):
+        self.cgwrite("@Write")
         s1 = write_node.expression.ncg_visit(self)
         if s1 == "location":
             self.cgwrite("pop {r2}")
@@ -140,6 +147,7 @@ class ASTCGVisitor:
         self.cgwrite("bl printf")
 
     def visitRepeatNode(self, repeat_node):
+        self.cgwrite("@Repeat")
         self.num_loop += 1
         local_num_loop = self.num_loop
         self.output_string += "loop{0}:\n".format(local_num_loop)
@@ -152,6 +160,7 @@ class ASTCGVisitor:
         self.output_string += "endloop{0}:\n".format(local_num_loop)
 
     def visitIndexNode(self, index_node):
+        self.cgwrite("@Index")
         index_node.location.ncg_visit(self)
         s = index_node.expression.ncg_visit(self)
         if s == "location":
@@ -170,23 +179,28 @@ class ASTCGVisitor:
         return "location"
 
     def visitNumberNode(self, number_node):
+        self.cgwrite("@number")
         self.cgwrite("ldr r2, ={0}".format(number_node.constant.value))
         self.cgwrite("push {r2}")
         return "number"
 
     def visitFieldNode(self, field_node):
+        self.cgwrite("@Field")
         field_node.location.ncg_visit(self)
-        field_node.variable.ncg_visit(self)
-        self.cgwrite("pop {r2}")
-        self.cgwrite("ldr r2, [r2]")
+        #field_node.variable.ncg_visit(self)
+        self.cgwrite("ldr r2, ={0}".format(field_node.variable.variable.offset))
         self.cgwrite("push {r2}")
         self.cgwrite("pop {r2}")
+        #self.cgwrite("ldr r2, [r2]")
+        #self.cgwrite("push {r2}")
+        #self.cgwrite("pop {r2}")
         self.cgwrite("pop {r3}")
         self.cgwrite("add r2, r3, r2")
         self.cgwrite("push {r2}")
         return "location"
 
     def visitBinaryNode(self, binary_node):
+        self.cgwrite("@ binary")
         re = binary_node.exp_left.ncg_visit(self)
         if re == "location":
             self.cgwrite("pop {r2}")

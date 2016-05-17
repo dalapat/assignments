@@ -750,7 +750,7 @@ class Parser:
         self.observer.end_expression_list()
         return exp_list
 
-
+'''
 def main():
     #f = open("../compilers4/test2.txt")
     #f = open("../compilers4/test.txt")
@@ -759,8 +759,10 @@ def main():
     #f = open("test.txt")
     #f = open("test2.txt")
     #f = open("random.sim")
-    #f = open("test4.txt") # 20 23 45
-    f = open("record.txt")
+    #f = open("simple3.txt") # 20 23 45
+    f = open("test4.txt")
+    #f = open("record.txt")
+    #f = open("array_simple.txt")
 
     input_string = ""
     for line in f:
@@ -773,3 +775,4 @@ def main():
     p.parse()
     #print p.program_scope
 main()
+'''
