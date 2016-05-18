@@ -48,7 +48,7 @@ class Parser:
     # initializes Parser instance and parses a list of tokens
     # cmd line arguments determine output type
     def __init__(self, observer = Observer(),
-                 token_list=[], print_symbol_table = 0, visitor = Visitor()):
+                 token_list=[], print_symbol_table = 0, visitor = Visitor(), filename=""):
         self.current = 0 # current position in token list
         self.token_list = token_list # token list received from scanner
         self.kind_map = Token.kind_map # dictionary of token kinds
@@ -59,6 +59,7 @@ class Parser:
         self.program_scope = Scope(self.universe) # program scope to hold program names
         self.current_scope = self.program_scope # current scope for switching between scopes
         self.print_symbol_table = print_symbol_table # determines whether to print cst or st
+        self.filename = filename
         self.visitor = visitor
 
     # parse the token list
@@ -92,7 +93,7 @@ class Parser:
 
                 visitor = CGSymbolTableVisitor()
                 self.current_scope.ncg_visit(visitor)
-                code_generator = ASTCGVisitor(self.current_scope, instructions)
+                code_generator = ASTCGVisitor(self.current_scope, instructions, self.filename)
                 code_generator.start()
                 code_generator.cgoutput()
                 #print environment.env_size

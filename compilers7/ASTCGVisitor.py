@@ -6,13 +6,14 @@ class ASTCGVisitor:
 
     #
 
-    def __init__(self, environment, ast):
+    def __init__(self, environment, ast, filename):
         self.ast = ast
         self.environment = environment
         self.numif = 0
         self.output_string = ""
         self.stack = []
         self.index_node_flag = 0
+        self.filename = filename
         self.num_loop = 0
         self.wordcopy = 0
         self.recordcopy = 0
@@ -30,6 +31,8 @@ class ASTCGVisitor:
         #self.cgwrite(".space {0}".format(self.scope.stsize))
         self.output_string += "format:\t\t.asciz \"%d\\n\"\n" # does a dot need to be here
         self.output_string += "scan_format:\t\t.asciz\"%d\"\n"
+        self.output_string += "divby0msg:\t\t.asciz \"error: dividing by 0\n\"\n"
+        self.output_string += "indexmsg:\t\t.asciz \"error: index\n\"\n"
         #self.cgwrite(".asciz \"%d\\n\"")
         self.cgwrite(".text")
         #self.cgwrite(".align 4")
@@ -40,9 +43,17 @@ class ASTCGVisitor:
         self.cgwrite("ldr r11, =vars")
         self.visitInstructions(self.ast)
         self.cgwrite("bl exit")
+        self.output_string += "divby0err:\n"
+        self.cgwrite("ldr r0, =divby0msg")
+        self.cgwrite("bl printf")
+        self.cgwrite("bl exit")
+        self.output_string += "indexerror:\n"
+        self.cgwrite("ldr r0, =indexmsg")
+        self.cgwrite("bl printf")
+        self.cgwrite("bl exit")
 
     def cgoutput(self):
-        f = open("test2.s", "w")
+        f = open(self.filename+".s", "w")
         f.write(self.output_string)
         f.close()
 
@@ -211,6 +222,12 @@ class ASTCGVisitor:
         if s == "location":
             self.cgwrite("pop {r2}")
             self.cgwrite("ldr r2, [r2]")
+            ###
+            self.cgwrite("cmp r2, #0")
+            self.cgwrite("blt indexerror")
+            self.cgwrite("cmp r2, #{0}".format(index_node.location.type.length))
+            self.cgwrite("bgt indexerror")
+            ###
             self.cgwrite("push {r2}")
         if isinstance(index_node.location.type, Array):
             self.cgwrite("ldr r3, ={0}".format(index_node.location.type.unit_size))
@@ -275,6 +292,8 @@ class ASTCGVisitor:
             self.cgwrite("mul r2, r0, r1")
             self.cgwrite("push {r2}")
         elif binary_node.operator == "DIV":
+            self.cgwrite("cmp r1, #0")
+            self.cgwrite("beq divby0err")
             self.cgwrite("bl __aeabi_idiv")
             self.cgwrite("push {r0}")
         elif binary_node.operator == "MOD":
