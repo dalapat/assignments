@@ -31,8 +31,8 @@ class ASTCGVisitor:
         #self.cgwrite(".space {0}".format(self.scope.stsize))
         self.output_string += "format:\t\t.asciz \"%d\\n\"\n" # does a dot need to be here
         self.output_string += "scan_format:\t\t.asciz\"%d\"\n"
-        self.output_string += "divby0msg:\t\t.asciz \"error: dividing by 0\n\"\n"
-        self.output_string += "indexmsg:\t\t.asciz \"error: index\n\"\n"
+        self.output_string += "divby0msg:\t\t.asciz \"error: dividing by 0\"\n"
+        self.output_string += "indexmsg:\t\t.asciz \"error: index\"\n"
         #self.cgwrite(".asciz \"%d\\n\"")
         self.cgwrite(".text")
         #self.cgwrite(".align 4")
