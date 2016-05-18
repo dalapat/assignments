@@ -759,7 +759,7 @@ def main():
     #f = open("test.txt")
     #f = open("test2.txt")
     #f = open("random.sim")
-    f = open("test4.txt") # 20 23 45
+    f = open("recordcopy.txt") # 20 23 45
     #f = open("array_simple.txt")
     #f = open("record.txt")
     #f = open("array_simple.txt")

@@ -14,7 +14,8 @@ class ASTCGVisitor:
         self.stack = []
         self.index_node_flag = 0
         self.num_loop = 0
-        self.wordnum = 0
+        self.wordcopy = 0
+        self.recordcopy = 0
 
     def cgwrite(self, string):
         self.output_string += "\t\t{0}\n".format(string)
@@ -78,16 +79,40 @@ class ASTCGVisitor:
             self.cgwrite("pop {r1}")
             '''self.cgwrite("ldr r0, r2")
             self.cgwrite("ldr r1, r3")'''
-            self.cgwrite("mov r2, #{0}".format(assign_node.expression.type.length))
-            self.output_string += "wordcopy{0}:\n".format(self.wordnum)
-            self.cgwrite("ldr r3, [r0], #{0}".format(assign_node.expression.type.unit_size))
-            self.cgwrite("str r3, [r1], #{0}".format(assign_node.expression.type.unit_size))
-            self.cgwrite("subs r2, r2, #1")
-            self.cgwrite("bne wordcopy{0}".format(self.wordnum))
-            self.wordnum += 1
+            self.cgwrite("mov r2, #{0}".format(assign_node.expression.type.size))
+            self.output_string += "wordcopy{0}:\n".format(self.wordcopy)
+            #self.cgwrite("ldr r3, [r0], #{0}".format(assign_node.expression.type.unit_size))
+            #self.cgwrite("str r3, [r1], #{0}".format(assign_node.expression.type.unit_size))
+            self.cgwrite("ldr r3, [r0], #4")
+            self.cgwrite("str r3, [r1], #4")
+            self.cgwrite("subs r2, r2, #4")
+            self.cgwrite("bne wordcopy{0}".format(self.wordcopy))
+            self.wordcopy += 1
         elif isinstance(assign_node.location.type, Record) and \
             isinstance(assign_node.expression.type, Record):
-            pass
+            '''
+            self.cgwrite("pop {r0}")
+            self.cgwrite("pop {r1}")
+            self.cgwrite("mov r2, #{0}".format(assign_node.expression.type.size))
+            #self.output_string += "recordcopy{0}:\n".format(self.recordcopy)
+            st = assign_node.expression.type.scope.symbol_table
+            for field_identifier in st:
+                fsize = st[field_identifier].size
+                self.cgwrite("ldr r3, [r0], #{0}".format(fsize))
+                self.cgwrite("str r3, [r1], #{0}".format(fsize))
+                self.cgwrite("subs r2, r2, #{0}".format(fsize))
+            '''
+
+            self.cgwrite("pop {r0}")
+            self.cgwrite("pop {r1}")
+            self.cgwrite("mov r2, #{0}".format(assign_node.expression.type.scope.size))
+            self.output_string += "recordcopy{0}:\n".format(self.recordcopy)
+            self.cgwrite("ldr r3, [r0], #4")
+            self.cgwrite("str r3, [r1], #4")
+            self.cgwrite("subs r2, r2, #4")
+            self.cgwrite("bne recordcopy{0}".format(self.recordcopy))
+            self.recordcopy += 1
+
 
     def visitIfNode(self, if_node):
         self.cgwrite("@If")
