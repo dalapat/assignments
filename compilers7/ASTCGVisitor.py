@@ -279,7 +279,7 @@ class ASTCGVisitor:
             self.cgwrite("push {r0}")
         elif binary_node.operator == "MOD":
             self.cgwrite("bl __aeabi_idivmod")
-            self.cgwrite("push {r2}")
+            self.cgwrite("push {r1}")
         else:
             pass
         return "number"
