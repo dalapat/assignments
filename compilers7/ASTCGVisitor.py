@@ -4,6 +4,8 @@ from Record import Record
 from Integer import Integer
 class ASTCGVisitor:
 
+    #
+
     def __init__(self, environment, ast):
         self.ast = ast
         self.environment = environment
@@ -12,6 +14,7 @@ class ASTCGVisitor:
         self.stack = []
         self.index_node_flag = 0
         self.num_loop = 0
+        self.wordnum = 0
 
     def cgwrite(self, string):
         self.output_string += "\t\t{0}\n".format(string)
@@ -57,20 +60,34 @@ class ASTCGVisitor:
         self.cgwrite("@Assign")
         assign_node.location.ncg_visit(self)
         s = assign_node.expression.ncg_visit(self)
-        if s == "location":
-            self.cgwrite("pop {r3}")
-            self.cgwrite("ldr r3, [r3]")
-            self.cgwrite("pop {r2}")
-            self.cgwrite("str r3, [r2]")
-        elif s == "number":
-            self.cgwrite("pop {r3}")
-            self.cgwrite("pop {r2}")
-            self.cgwrite("str r3, [r2]")
-            #self.cgwrite("push {r2}")
-        #self.cgwrite("pop {r2}")
-        '''self.cgwrite("pop {r2}")
-        self.cgwrite("pop {r3}")
-        self.cgwrite("str r2, r3")'''
+        if isinstance(assign_node.location.type, Integer) and \
+                isinstance(assign_node.expression.type, Integer):
+
+            if s == "location":
+                self.cgwrite("pop {r3}")
+                self.cgwrite("ldr r3, [r3]")
+                self.cgwrite("pop {r2}")
+                self.cgwrite("str r3, [r2]")
+            elif s == "number":
+                self.cgwrite("pop {r3}")
+                self.cgwrite("pop {r2}")
+                self.cgwrite("str r3, [r2]")
+        elif isinstance(assign_node.location.type, Array) and \
+                isinstance(assign_node.expression.type, Array):
+            self.cgwrite("pop {r0}")
+            self.cgwrite("pop {r1}")
+            '''self.cgwrite("ldr r0, r2")
+            self.cgwrite("ldr r1, r3")'''
+            self.cgwrite("mov r2, #{0}".format(assign_node.expression.type.length))
+            self.output_string += "wordcopy{0}:\n".format(self.wordnum)
+            self.cgwrite("ldr r3, [r0], #{0}".format(assign_node.expression.type.unit_size))
+            self.cgwrite("str r3, [r1], #{0}".format(assign_node.expression.type.unit_size))
+            self.cgwrite("subs r2, r2, #1")
+            self.cgwrite("bne wordcopy{0}".format(self.wordnum))
+            self.wordnum += 1
+        elif isinstance(assign_node.location.type, Record) and \
+            isinstance(assign_node.expression.type, Record):
+            pass
 
     def visitIfNode(self, if_node):
         self.cgwrite("@If")
