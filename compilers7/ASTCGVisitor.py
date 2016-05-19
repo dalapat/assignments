@@ -4,23 +4,27 @@ from Record import Record
 from Integer import Integer
 class ASTCGVisitor:
 
-    #
+    ''' Class to translate Simple to Assembly'''
 
+
+    # Initialize the visitor
     def __init__(self, environment, ast, filename):
-        self.ast = ast
-        self.environment = environment
-        self.numif = 0
-        self.output_string = ""
-        self.stack = []
-        self.index_node_flag = 0
-        self.filename = filename
-        self.num_loop = 0
-        self.wordcopy = 0
-        self.recordcopy = 0
+        self.ast = ast # instructions
+        self.environment = environment # symbol table
+        self.numif = 0 # keep track of if
+        self.output_string = "" # assembly instructions
+        self.stack = [] # external stack
+        self.index_node_flag = 0 # external flag
+        self.filename = filename # output filename
+        self.num_loop = 0 # keep track of loop
+        self.wordcopy = 0 # help with copy
+        self.recordcopy = 0 # help with record
 
+    # output instructions
     def cgwrite(self, string):
         self.output_string += "\t\t{0}\n".format(string)
 
+    # write headers
     def start(self):
         self.cgwrite(".arch armv6")
         self.cgwrite(".fpu vfp")
@@ -52,22 +56,26 @@ class ASTCGVisitor:
         self.cgwrite("bl printf")
         self.cgwrite("bl exit")
 
+    # write instructions to file
     def cgoutput(self):
         f = open(self.filename+".s", "w")
         f.write(self.output_string)
         f.close()
 
+    # output code for the current instruction
     def visitInstructions(self, head):
         while head is not None:
             head.ncg_visit(self)
             head = head._next
 
+    # output code for a variable node
     def visitVariableNode(self, variable_node):
         self.cgwrite("@Variable")
         self.cgwrite("add r2, r11, #{0}".format(variable_node.variable.offset))
         self.cgwrite("push {r2}")
         return "location"
 
+    # output code for an assign node
     def visitAssignNode(self, assign_node):
         self.cgwrite("@Assign")
         assign_node.location.ncg_visit(self)
@@ -124,7 +132,7 @@ class ASTCGVisitor:
             self.cgwrite("bne recordcopy{0}".format(self.recordcopy))
             self.recordcopy += 1
 
-
+    # output code for an if node
     def visitIfNode(self, if_node):
         self.cgwrite("@If")
         if_node.condition.ncg_visit(self)
@@ -144,6 +152,7 @@ class ASTCGVisitor:
         self.cgwrite("bl endif{0}".format(local_numif))
         self.output_string += "endif{0}:\n".format(local_numif)
 
+    # output code for a condition node
     def visitConditionNode(self, condition_node):
         self.cgwrite("@Condition")
         s1 = condition_node.exp_left.ncg_visit(self)
@@ -182,6 +191,7 @@ class ASTCGVisitor:
             exit(1)
         self.cgwrite("push {r2}")
 
+    # output code for a read node
     def visitReadNode(self, read_node):
         self.cgwrite("@Read")
         read_node.location.ncg_visit(self)
@@ -190,6 +200,7 @@ class ASTCGVisitor:
         #self.cgwrite("mov r1, r2")
         self.cgwrite("bl scanf")
 
+    # output code for a write node
     def visitWriteNode(self, write_node):
         self.cgwrite("@Write")
         s1 = write_node.expression.ncg_visit(self)
@@ -202,6 +213,7 @@ class ASTCGVisitor:
             #self.cgwrite("mov r1, r2")
         self.cgwrite("bl printf")
 
+    # output code for a repeat node
     def visitRepeatNode(self, repeat_node):
         self.cgwrite("@Repeat")
         self.num_loop += 1
@@ -215,6 +227,7 @@ class ASTCGVisitor:
         self.cgwrite("bne endloop{0}".format(local_num_loop))
         self.output_string += "endloop{0}:\n".format(local_num_loop)
 
+    # output code for an index node
     def visitIndexNode(self, index_node):
         self.cgwrite("@Index")
         index_node.location.ncg_visit(self)
@@ -222,12 +235,10 @@ class ASTCGVisitor:
         if s == "location":
             self.cgwrite("pop {r2}")
             self.cgwrite("ldr r2, [r2]")
-            ###
             self.cgwrite("cmp r2, #0")
             self.cgwrite("blt indexerror")
             self.cgwrite("cmp r2, #{0}".format(index_node.location.type.length))
             self.cgwrite("bgt indexerror")
-            ###
             self.cgwrite("push {r2}")
         if isinstance(index_node.location.type, Array):
             self.cgwrite("ldr r3, ={0}".format(index_node.location.type.unit_size))
@@ -247,12 +258,14 @@ class ASTCGVisitor:
         self.cgwrite("push {r2}")
         return "location"
 
+    # output code for a number
     def visitNumberNode(self, number_node):
         self.cgwrite("@number")
         self.cgwrite("ldr r2, ={0}".format(number_node.constant.value))
         self.cgwrite("push {r2}")
         return "number"
 
+    # output code for a field node
     def visitFieldNode(self, field_node):
         self.cgwrite("@Field")
         field_node.location.ncg_visit(self)
@@ -268,6 +281,7 @@ class ASTCGVisitor:
         self.cgwrite("push {r2}")
         return "location"
 
+    # output code for a binary node
     def visitBinaryNode(self, binary_node):
         self.cgwrite("@ binary")
         re = binary_node.exp_left.ncg_visit(self)

@@ -8,9 +8,13 @@ from Variable import Variable
 
 class CGSymbolTableVisitor:
 
+    ''' class to set offsets '''
+
+    # initialize the visitor
     def __init__(self):
         self.env_size = 0
 
+    # define offsets for a scope
     def visitScope(self, scope):
         offset = 0
         for identifier in scope.symbol_table:
@@ -40,12 +44,15 @@ class CGSymbolTableVisitor:
         return environment
     '''
 
+    # define offset for a variable
     def visitVar(self, variable_obj):
         return variable_obj._type.ncg_visit(self)
 
+    # define offset for an integer
     def visitInt(self):
         return Integer().size
 
+    # define offset for an array
     def visitArray(self, array):
         unit_size = array._type.ncg_visit(self)
         array.unit_size = unit_size
@@ -76,6 +83,7 @@ class CGSymbolTableVisitor:
         return cgbox
     '''
 
+    # define offset for a record
     def visitRecord(self, record):
         record.scope.ncg_visit(self)
         size = record.scope.size
